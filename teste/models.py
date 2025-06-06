@@ -4,3 +4,4 @@ from django.db import models
 class Ruas(models.Model):
     title = models.CharField(max_lenght=50)
     DESCRIPTION = models.TextField()
+    numdeRua = models.TextField()
