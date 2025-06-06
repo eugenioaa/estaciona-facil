@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Avaliações de Estacionamento</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <h1>Sistema de Avaliações de Estacionamentos</h1>
+
+  <section class="estacionamento-info">
+    <img src="https://imagens.ebc.com.br/4HhRwVZ3hQhwU-n9jUwCTlL7Z3o=/1600x800/https://agenciabrasil.ebc.com.br/sites/default/files/thumbnails/image/puc1.jpg?itok=rxSPsqxf" alt="Foto do Estacionamento da PUC-Rio" class="estacionamento-img">
+    <div>
+      <h2>Estacionamento da PUC-Rio</h2>
+      <p>Endereço: Rua Marquês de São Vicente, 225 - Gávea</p>
+      <p>Disponibilidade: Alta</p>
+      <p>Horário de Funcionamento: 07h às 22h</p>
+      <div class="avaliacoes">
+        <h3>Avaliação Média</h3>
+        <p>Segurança:
+          <span class="estrelas">★★★★☆</span>
+        </p>
+        <p>Praticidade:
+          <span class="estrelas">★★★☆☆</span>
+        </p>
+        <p>Preço:
+          <span class="estrelas">★★☆☆☆</span>
+        </p>
+        <p>Disponibilidade:
+          <span class="estrelas">★★★★☆</span>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="avaliacoes">
+    <h2>Avaliações</h2>
+    <div class="avaliacao">
+      <strong>Usuário1</strong> - ⭐⭐⭐⭐☆<br>
+      “Bom espaço e localização, mas um pouco caro.”
+    </div>
+    <div class="avaliacao">
+      <strong>Usuário2</strong> - ⭐⭐⭐☆☆<br>
+      “Demorei para encontrar vaga no horário de pico.”
+    </div>
+  </section>
+
+  <section class="formulario">
+    <h2>Deixe sua Avaliação</h2>
+    <form action="#" method="POST">
+      <label for="nota">Nota - Segurança (1 a 5):</label>
+      <input type="number" id="nota" name="nota" min="1" max="5" required>
+      <label for="nota">Nota - Praticidade (1 a 5):</label>
+      <input type="number" id="nota" name="nota" min="1" max="5" required>
+      <label for="nota">Nota - Preço (1 a 5):</label>
+      <input type="number" id="nota" name="nota" min="1" max="5" required>
+      <label for="nota">Nota - Disponibilidade (1 a 5):</label>
+      <input type="number" id="nota" name="nota" min="1" max="5" required>
+
+      <label for="comentario">Comentário:</label>
+      <textarea id="comentario" name="comentario" rows="4" required></textarea>
+
+      <button type="submit">Enviar Avaliação</button>
+    </form>
+  </section>
+</body>
+</html>
