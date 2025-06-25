@@ -37,7 +37,7 @@ if 'CODESPACE_NAME' in os.environ:
 
 # Application definition
 
-AUTH_USER_MODEL = 'login.Usuario'
+AUTH_USER_MODEL = 'app.Usuario'
 
 INSTALLED_APPS = [
     "django.contrib.admin",

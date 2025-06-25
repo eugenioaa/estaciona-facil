@@ -1,0 +1,59 @@
+{% load django_browser_reload %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+{% load static %}
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Registrar Estacionamento</title>
+  <link rel="stylesheet" href="{% static 'registroEstacionamento.css' %}" />
+</head>
+<body>
+  <div class="container">
+    <h1>Cadastro de Estacionamento</h1>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      
+      <div class="field">
+        {{ form.nome.label_tag }}
+        {{ form.nome }}
+        {{ form.nome.errors }}
+      </div>
+      
+      <div class="field">
+        {{ form.endereco.label_tag }}
+        {{ form.endereco }}
+        {{ form.endereco.errors }}
+      </div>
+      
+      <div class="field">
+        {{ form.disponibilidade.label_tag }}
+        {{ form.disponibilidade }}
+        {{ form.disponibilidade.errors }}
+      </div>
+      
+      <div class="field half">
+        {{ form.horario_abertura.label_tag }}
+        {{ form.horario_abertura }}
+        {{ form.horario_abertura.errors }}
+      </div>
+      <div class="field half">
+        {{ form.horario_fechamento.label_tag }}
+        {{ form.horario_fechamento }}
+        {{ form.horario_fechamento.errors }}
+      </div>
+      
+      <div class="field">
+        {{ form.imagem_url.label_tag }}
+        {{ form.imagem_url }}
+        {{ form.imagem_url.errors }}
+      </div>
+      
+      <button type="submit" class="btn">Salvar Estacionamento</button>
+    </form>
+  </div>
+</body>
+</html>
