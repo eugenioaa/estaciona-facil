@@ -1,0 +1,81 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 20px;
+    background-color: 	#888888 /* cinza escuro */
+  }
+  
+  /* Botões amarelo escuro */
+  button {
+    padding: 10px 20px;
+    font-size: 18px;
+    margin: 10px;
+    border: none;
+    border-radius: 8px;
+    background-color: #c9a000; /* amarelo escuro */
+    color: white;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #b38f00; /* tom mais escuro no hover */
+  }
+  
+  /* Caixas brancas em volta */
+  .caixa {
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    width: 80%;
+    margin: 20px auto;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Notificações */
+  #notificacoes {
+    text-align: left;
+    height: 120px;
+    overflow-y: auto;
+  }
+  
+  /* Avaliações */
+  #avaliacoes .avaliacao {
+    margin-bottom: 10px;
+  }
+
+  .cabecalho {
+    background-color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 30px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+  }
+  
+  .logo img {
+    height: 50px;
+  }
+  
+  .menu button {
+    margin-left: 10px;
+    padding: 8px 16px;
+    font-size: 16px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    background-color: #888888; /* cinza para não ativo */
+    color: white;
+  }
+  
+  .menu button:hover {
+    background-color: #777777;
+  }
+  
+  .menu .ativo {
+    background-color: #c9a000; /* amarelo escuro */
+  }
+  
+  .menu .ativo:hover {
+    background-color: #b38f00;
+  }

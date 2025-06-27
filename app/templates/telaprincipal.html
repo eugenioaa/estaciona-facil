@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="styles.css" />
+
+    
+</head>
+<body>
+  <header class="cabecalho">
+    <div class="logo">
+      <img src="https://img.freepik.com/vetores-premium/pin-de-vetor-de-modelo-de-logotipo-de-estacionamento-de-carros_316488-5081.jpg" alt="Logo do Projeto" />
+    </div>
+    <nav class="menu">
+      <button class="ativo" onclick="location.href='index.html'">Início</button>
+      <button onclick="location.href='mapa.html'">Mapa</button>
+      <button onclick="location.href='simulador.html'">Simulador</button>
+      <button onclick="location.href='avaliacao.html'">Avaliação</button>
+    </nav>
+  </header>
+
+    <h1>Encontre o melhor lugar para estacionar o seu carro</h1>
+    <h1>Bem-vindo à Simulação</h1>
+
+    <button onclick="location.href='simulacao.html'">Simular Agora</button>
+  
+    <div class="caixa">
+      <img src="https://bynd.com.br/wp-content/uploads/2019/07/vagas-de-estacionamento.jpg" alt="Imagem de Simulação" width="600" height="300" />
+    </div>
+  
+    <div id="notificacoes" class="caixa">
+      <strong>Notificações:</strong>
+      <ul id="notificacoes-lista"></ul>
+    </div>
+
+    <div class="caixa">
+      <h3>Que tal simular em outro horario?</h3>
+      <button onclick="location.href='simulador_demanda.html'">Ir para Simulador de Demanda</button>
+    </div>
+  
+    <div id="avaliacoes" class="caixa">
+      <h3>Últimas Avaliações adcionadas</h3>
+      <div class="avaliacao">
+        ⭐⭐⭐⭐☆ — Muito útil e intuitivo!
+      </div>
+      <div class="avaliacao">
+        ⭐⭐⭐⭐⭐ — Ajudou muito no meu planejamento!
+      </div>
+    </div>
+  
+    <script>
+      const notificacoes = [
+        "Novo cenário de simulação disponível.",
+        "Demanda atualizada com sucesso.",
+        "Erro corrigido no modelo de previsão.",
+        "Novo feedback recebido."
+      ];
+  
+      let index = 0;
+      setInterval(() => {
+        if (index < notificacoes.length) {
+          const li = document.createElement("li");
+          li.textContent = notificacoes[index++];
+          document.getElementById("notificacoes-lista").appendChild(li);
+        }
+      }, 2000);
+    </script>
+   
+    
+</body>
+</html>
