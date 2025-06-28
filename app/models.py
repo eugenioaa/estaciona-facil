@@ -1,33 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
-class Avaliacao(models.Model):
-    usuario = models.CharField(max_length=100, default="Anônimo")  # ou use um User FK se quiser login
-    nota_seguranca = models.PositiveSmallIntegerField(choices=[(i, i) for i in range(1, 6)])
-    nota_praticidade = models.PositiveSmallIntegerField(choices=[(i, i) for i in range(1, 6)])
-    nota_preco = models.PositiveSmallIntegerField(choices=[(i, i) for i in range(1, 6)])
-    nota_disponibilidade = models.PositiveSmallIntegerField(choices=[(i, i) for i in range(1, 6)])
-    comentario = models.TextField()
-    data_avaliacao = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Avaliação de {self.usuario} em {self.data_avaliacao.strftime('%d/%m/%Y')}"
-
-    def media_avaliacao(self):
-        return round((self.nota_seguranca + self.nota_praticidade + self.nota_preco + self.nota_disponibilidade) / 4, 2)
-    
 class Usuario(AbstractUser):
     """
-    Modelo de usuário personalizado com campos adicionais:
-    - email: usado como campo único (já presente em AbstractUser, mas reforçado em unique)
-    - username: nome de usuário (do AbstractUser)
-    - password: gerenciado pelo AbstractUser
-    - lugar_mora: local de residência do usuário (opcional para superuser)
-    - vehicle_type: tipo de veículo utilizado (Carro ou Moto) (opcional para superuser)
+    Modelo de usuário personalizado com campos adicionais.
     """
-
     email = models.EmailField('email', unique=True)
     lugar_mora = models.CharField('lugar onde mora', max_length=255, blank=True, null=True)
+
     VEHICLE_CHOICES = [
         ('carro', 'Carro'),
         ('moto', 'Moto'),
@@ -36,29 +16,20 @@ class Usuario(AbstractUser):
         'utiliza veículo',
         max_length=10,
         choices=VEHICLE_CHOICES,
-        default='carro',
         blank=True,
         null=True,
     )
 
-    # Apenas o email é obrigatório ao criar superuser
-    REQUIRED_FIELDS = ['email']
+    REQUIRED_FIELDS = ['email']  # username continua obrigatório
 
     def __str__(self):
         return f"{self.username} ({self.email})"
 
+
 class Estacionamento(models.Model):
     """
-    Modelo para registrar estacionamentos.
-    Campos:
-    - nome: nome do estacionamento
-    - endereco: endereço completo
-    - disponibilidade: nível de vagas disponíveis
-    - horario_abertura: hora de início de funcionamento
-    - horario_fechamento: hora de término de funcionamento
-    - imagem_url: link opcional para imagem do estacionamento
+    Modelo para armazenar informações sobre um estacionamento.
     """
-
     DISPONIBILIDADE_CHOICES = [
         ('baixa', 'Baixa'),
         ('media', 'Média'),
@@ -86,3 +57,37 @@ class Estacionamento(models.Model):
     def __str__(self):
         return f"{self.nome} - {self.endereco}"
 
+
+class Avaliacao(models.Model):
+    """
+    Avaliação de um estacionamento, podendo ser feita por usuário autenticado ou anônimo.
+    """
+    usuario = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='avaliacoes'
+    )
+    estacionamento = models.ForeignKey(
+        Estacionamento,
+        on_delete=models.CASCADE,
+        related_name='avaliacoes',
+        null=True,
+        blank=True
+    )
+    nota_seguranca = models.PositiveSmallIntegerField(choices=[(i, i) for i in range(1, 6)])
+    nota_praticidade = models.PositiveSmallIntegerField(choices=[(i, i) for i in range(1, 6)])
+    nota_preco = models.PositiveSmallIntegerField(choices=[(i, i) for i in range(1, 6)])
+    nota_disponibilidade = models.PositiveSmallIntegerField(choices=[(i, i) for i in range(1, 6)])
+    comentario = models.TextField()
+    data_avaliacao = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        nome_usuario = self.usuario.username if self.usuario else "Anônimo"
+        return f"Avaliação de {nome_usuario} em {self.estacionamento.nome} - {self.data_avaliacao.strftime('%d/%m/%Y')}"
+
+    def media_avaliacao(self):
+        return round(
+            (self.nota_seguranca + self.nota_praticidade + self.nota_preco + self.nota_disponibilidade) / 4, 2
+        )

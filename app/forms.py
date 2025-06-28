@@ -1,18 +1,15 @@
 from django import forms
-from .models import Avaliacao
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from .models import Usuario, Estacionamento
+from django.contrib.auth.forms import UserCreationForm
+from .models import Avaliacao, Usuario, Estacionamento
 
 class AvaliacaoForm(forms.ModelForm):
+    """
+    Formulário para submissão de avaliações de estacionamentos.
+    Os campos 'usuario' e 'estacionamento' são preenchidos na view.
+    """
     class Meta:
         model = Avaliacao
-        fields = [
-            'nota_seguranca',
-            'nota_praticidade',
-            'nota_preco',
-            'nota_disponibilidade',
-            'comentario',
-        ]
+        exclude = ['usuario', 'estacionamento']  # Importante para não exibir no formulário
         labels = {
             'nota_seguranca': 'Nota - Segurança (1 a 5)',
             'nota_praticidade': 'Nota - Praticidade (1 a 5)',
@@ -25,13 +22,13 @@ class AvaliacaoForm(forms.ModelForm):
             'nota_praticidade': forms.NumberInput(attrs={'min': 1, 'max': 5, 'required': True}),
             'nota_preco': forms.NumberInput(attrs={'min': 1, 'max': 5, 'required': True}),
             'nota_disponibilidade': forms.NumberInput(attrs={'min': 1, 'max': 5, 'required': True}),
-            'comentario': forms.Textarea(attrs={'rows': 4, 'required': True}),
+            'comentario': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Escreva aqui seu comentário...'}),
         }
+
 
 class UsuarioRegistrationForm(UserCreationForm):
     """
-    Formulário para registrar novos usuários.
-    Campos: username, email, senha (password1, password2), lugar_mora, vehicle_type
+    Formulário para registro de novos usuários.
     """
     class Meta:
         model = Usuario
@@ -51,13 +48,16 @@ class UsuarioRegistrationForm(UserCreationForm):
         }
         help_texts = {
             'password1': 'Digite uma senha forte.',
-            'password2': 'Digite a mesma senha para confirmação.',
+            'password2': 'Repita a senha para confirmação.',
         }
+        widgets = {
+            'lugar_mora': forms.TextInput(attrs={'placeholder': 'Ex: Copacabana'}),
+        }
+
 
 class EstacionamentoForm(forms.ModelForm):
     """
-    Formulário para criar ou editar registros de estacionamento.
-    Campos: nome, endereco, disponibilidade, horario_abertura, horario_fechamento, imagem_url
+    Formulário para registro ou edição de estacionamentos.
     """
     class Meta:
         model = Estacionamento
@@ -75,13 +75,12 @@ class EstacionamentoForm(forms.ModelForm):
             'disponibilidade': 'Disponibilidade',
             'horario_abertura': 'Horário de Abertura',
             'horario_fechamento': 'Horário de Fechamento',
-            'imagem_url': 'URL da Imagem',
+            'imagem_url': 'URL da Imagem (opcional)',
         }
         help_texts = {
-            'imagem_url': 'Insira um link válido para a imagem (opcional).',
+            'imagem_url': 'Insira um link direto para a imagem (opcional).',
         }
         widgets = {
-            'horario_abertura': forms.TimeInput(format='%H:%M'),
-            'horario_fechamento': forms.TimeInput(format='%H:%M'),
+            'horario_abertura': forms.TimeInput(attrs={'type': 'time'}),
+            'horario_fechamento': forms.TimeInput(attrs={'type': 'time'}),
         }
-

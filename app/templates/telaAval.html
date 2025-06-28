@@ -1,4 +1,4 @@
-{% load django_browser_reload %}
+{# templates/avaliacao_estacionamento.html #}
 {% load static %}
 
 <!DOCTYPE html>
@@ -15,70 +15,107 @@
       <img src="https://img.freepik.com/vetores-premium/pin-de-vetor-de-modelo-de-logotipo-de-estacionamento-de-carros_316488-5081.jpg" alt="Logo do Projeto" />
     </div>
     <nav class="menu">
-      <button onclick="window.location.href='{% url 'tela_principal' %}'">Início</button>
-      <button onclick="location.href='mapa.html'">Mapa</button>
-      <button onclick="location.href='simulador.html'">Simulador</button>
-      <button class = "ativo" onclick="window.location.href='{% url 'sistema_avaliacao' %}'">Avaliação</button>
-      <button onclick="window.location.href='{% url 'register' %}'">Criar Conta</button>
+      <button onclick="location.href='{% url 'tela_principal' %}'">Início</button>
+      <button onclick="location.href='{% url 'sistema_avaliacao' %}'" class="ativo">Avaliação</button>
+      <button onclick="location.href='{% url 'register' %}'">Criar Conta</button>
     </nav>
   </header>
 
   <h1>Sistema de Avaliações de Estacionamentos</h1>
 
-  <section class="estacionamento-info">
-    <img src="https://imagens.ebc.com.br/4HhRwVZ3hQhwU-n9jUwCTlL7Z3o=/1600x800/https://agenciabrasil.ebc.com.br/sites/default/files/thumbnails/image/puc1.jpg?itok=rxSPsqxf" alt="Foto do Estacionamento da PUC-Rio" class="estacionamento-img">
-    <div>
-      <h2>Estacionamento da PUC-Rio</h2>
-      <p>Endereço: Rua Marquês de São Vicente, 225 - Gávea</p>
-      <p>Disponibilidade: Alta</p>
-      <p>Horário de Funcionamento: 07h às 22h</p>
-      <div class="avaliacoes">
-        <h3>Avaliação Média</h3>
-        <p>Segurança:
-          <span class="estrelas">★★★★☆</span>
-        </p>
-        <p>Praticidade:
-          <span class="estrelas">★★★☆☆</span>
-        </p>
-        <p>Preço:
-          <span class="estrelas">★★☆☆☆</span>
-        </p>
-        <p>Disponibilidade:
-          <span class="estrelas">★★★★☆</span>
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <section class="avaliacoes">
-    <h2>Avaliações</h2>
-    <div class="avaliacao">
-      <strong>Usuário1</strong> - ⭐⭐⭐⭐☆<br>
-      “Bom espaço e localização, mas um pouco caro.”
-    </div>
-    <div class="avaliacao">
-      <strong>Usuário2</strong> - ⭐⭐⭐☆☆<br>
-      “Demorei para encontrar vaga no horário de pico.”
-    </div>
-  </section>
-
-  <section class="formulario">
-    <h2>Deixe sua Avaliação</h2>
-    <form action="#" method="POST">
-      <label for="nota">Nota - Segurança (1 a 5):</label>
-      <input type="number" id="nota" name="nota" min="1" max="5" required>
-      <label for="nota">Nota - Praticidade (1 a 5):</label>
-      <input type="number" id="nota" name="nota" min="1" max="5" required>
-      <label for="nota">Nota - Preço (1 a 5):</label>
-      <input type="number" id="nota" name="nota" min="1" max="5" required>
-      <label for="nota">Nota - Disponibilidade (1 a 5):</label>
-      <input type="number" id="nota" name="nota" min="1" max="5" required>
-
-      <label for="comentario">Comentário:</label>
-      <textarea id="comentario" name="comentario" rows="4" required></textarea>
-
-      <button type="submit">Enviar Avaliação</button>
+  {# 1) Seletor de estacionamento #}
+  <section class="selecionar-estacionamento caixa">
+    <form method="get">
+      <label for="estac_id">Escolha o estacionamento:</label>
+      <select name="estac_id" id="estac_id" onchange="this.form.submit()">
+        <option value="">-- Selecione --</option>
+        {% for est in estacionamentos %}
+          <option value="{{ est.id }}" {% if est.id|stringformat:"s" == request.GET.estac_id %}selected{% endif %}>
+            {{ est.nome }}
+          </option>
+        {% endfor %}
+      </select>
     </form>
   </section>
+
+  {# 2) Se nenhum escolhido ainda, mostra mensagem #}
+  {% if not estacionamento %}
+    <p class="caixa">Selecione um estacionamento acima para ver detalhes e avaliações.</p>
+  {% else %}
+
+    {# 3) Informações do estacionamento selecionado #}
+    <section class="estacionamento-info caixa">
+      {% if estacionamento.imagem_url %}
+        <img src="{{ estacionamento.imagem_url }}" alt="Foto de {{ estacionamento.nome }}" class="estacionamento-img">
+      {% endif %}
+      <div>
+        <h2>{{ estacionamento.nome }}</h2>
+        <p>Endereço: {{ estacionamento.endereco }}</p>
+        <p>Disponibilidade: {{ estacionamento.get_disponibilidade_display }}</p>
+        <p>Horário de Funcionamento: {{ estacionamento.horario_abertura|time:"H:i" }} às {{ estacionamento.horario_fechamento|time:"H:i" }}</p>
+      </div>
+    </section>
+
+    {# 4) Avaliação média (passada no contexto pela view) #}
+    <section class="avaliacoes caixa">
+      <h3>Avaliação Média</h3>
+      <p>Segurança: <span class="estrelas">{{ media_seguranca }}</span></p>
+      <p>Praticidade: <span class="estrelas">{{ media_praticidade }}</span></p>
+      <p>Preço: <span class="estrelas">{{ media_preco }}</span></p>
+      <p>Disponibilidade: <span class="estrelas">{{ media_disponibilidade }}</span></p>
+    </section>
+
+    {# 5) Lista de avaliações individuais #}
+    <section class="avaliacoes caixa">
+      <h2>Avaliações dos Usuários</h2>
+      {% for avaliacao in avaliacoes %}
+        <div class="avaliacao">
+          <strong>{{ avaliacao.usuario.username }}</strong><br>
+          “{{ avaliacao.comentario }}”
+        </div>
+      {% empty %}
+        <p>Nenhuma avaliação ainda. Seja o primeiro a avaliar!</p>
+      {% endfor %}
+    </section>
+
+    {# 6) Formulário para deixar nova avaliação #}
+    <section class="formulario caixa">
+      <h2>Deixe sua Avaliação</h2>
+      <form method="post">
+        {% csrf_token %}
+        {{ avaliacao_form.non_field_errors }}
+
+        <input type="hidden" name="estacionamento" value="{{ estacionamento.id }}">
+
+        <div class="field">
+          {{ avaliacao_form.nota_seguranca.label_tag }}<br>
+          {{ avaliacao_form.nota_seguranca }}
+          {{ avaliacao_form.nota_seguranca.errors }}
+        </div>
+        <div class="field">
+          {{ avaliacao_form.nota_praticidade.label_tag }}<br>
+          {{ avaliacao_form.nota_praticidade }}
+          {{ avaliacao_form.nota_praticidade.errors }}
+        </div>
+        <div class="field">
+          {{ avaliacao_form.nota_preco.label_tag }}<br>
+          {{ avaliacao_form.nota_preco }}
+          {{ avaliacao_form.nota_preco.errors }}
+        </div>
+        <div class="field">
+          {{ avaliacao_form.nota_disponibilidade.label_tag }}<br>
+          {{ avaliacao_form.nota_disponibilidade }}
+          {{ avaliacao_form.nota_disponibilidade.errors }}
+        </div>
+        <div class="field">
+          {{ avaliacao_form.comentario.label_tag }}<br>
+          {{ avaliacao_form.comentario }}
+          {{ avaliacao_form.comentario.errors }}
+        </div>
+
+        <button type="submit" class="btn">Enviar Avaliação</button>
+      </form>
+    </section>
+  {% endif %}
 </body>
 </html>
