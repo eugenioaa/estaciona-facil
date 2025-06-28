@@ -18,3 +18,6 @@ def registerEstacionamento_view(request):
         form.save()
         return redirect('sistema_avaliacao')
     return render(request, 'registroEstacionamento.html', {'form': form})
+
+def telaPrincipal(request):
+    return render(request, "telaPrincipal.html")

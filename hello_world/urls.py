@@ -24,7 +24,7 @@ from hello_world.core import views as core_views
 from app.views import *
 
 urlpatterns = [
-    path("", core_views.index),
+    path("", telaPrincipal, name="tela_principal"),
     path("admin/", admin.site.urls),
     path("__reload__/", include("django_browser_reload.urls")),
     path("aval/", sistemaAval, name = "sistema_avaliacao"),
