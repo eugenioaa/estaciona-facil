@@ -10,6 +10,19 @@
   <link rel="stylesheet" href="{% static 'styles.css' %}" />
 </head>
 <body>
+  <header class="cabecalho">
+    <div class="logo">
+      <img src="https://img.freepik.com/vetores-premium/pin-de-vetor-de-modelo-de-logotipo-de-estacionamento-de-carros_316488-5081.jpg" alt="Logo do Projeto" />
+    </div>
+    <nav class="menu">
+      <button onclick="window.location.href='{% url 'tela_principal' %}'">Início</button>
+      <button onclick="location.href='mapa.html'">Mapa</button>
+      <button onclick="location.href='simulador.html'">Simulador</button>
+      <button class = "ativo" onclick="window.location.href='{% url 'sistema_avaliacao' %}'">Avaliação</button>
+      <button onclick="window.location.href='{% url 'register' %}'">Criar Conta</button>
+    </nav>
+  </header>
+
   <h1>Sistema de Avaliações de Estacionamentos</h1>
 
   <section class="estacionamento-info">
