@@ -29,7 +29,8 @@ urlpatterns = [
     path("__reload__/", include("django_browser_reload.urls")),
     path("aval/", sistemaAval, name = "sistema_avaliacao"),
     path('registroUsuario/', register_view, name='register'),
-    path('registroEstacionamento/', registerEstacionamento_view, name='register_estacionamento'),  
+    path('registroEstacionamento/', registerEstacionamento_view, name='register_estacionamento'),
+    path('login/', login_view, name='login'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

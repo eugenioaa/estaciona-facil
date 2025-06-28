@@ -3,6 +3,8 @@ from .forms import AvaliacaoForm, UsuarioRegistrationForm, EstacionamentoForm
 from .models import Estacionamento, Avaliacao
 from django.db.models import Avg
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login as auth_login
+from django import forms
 
 def telaPrincipal(request):
     return render(request, "telaPrincipal.html")
@@ -72,3 +74,21 @@ def registerEstacionamento_view(request):
         form.save()
         return redirect("sistema_avaliacao")
     return render(request, "registroEstacionamento.html", {"form": form})
+
+
+class LoginForm(forms.Form):
+    username = forms.CharField(label='Usuário')
+    password = forms.CharField(label='Senha', widget=forms.PasswordInput)
+
+def login_view(request):
+    form = LoginForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        username = form.cleaned_data['username']
+        password = form.cleaned_data['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            auth_login(request, user)
+            return redirect('tela_principal')
+        else:
+            form.add_error(None, 'Usuário ou senha inválidos.')
+    return render(request, 'login.html', {'form': form})
