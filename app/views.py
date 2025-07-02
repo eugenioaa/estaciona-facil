@@ -5,6 +5,7 @@ from django.db.models import Avg
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login as auth_login
 from django import forms
+from django.contrib.auth import logout
 
 def telaPrincipal(request):
     return render(request, "telaPrincipal.html")
@@ -92,3 +93,24 @@ def login_view(request):
         else:
             form.add_error(None, 'Usuário ou senha inválidos.')
     return render(request, 'login.html', {'form': form})
+
+@login_required
+def editar_usuario_view(request):
+    user = request.user
+    if request.method == 'POST':
+        form = UsuarioRegistrationForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect('tela_principal')
+    else:
+        form = UsuarioRegistrationForm(instance=user)
+    return render(request, 'editarUser.html', {'form': form})
+
+@login_required
+def deletar_usuario_view(request):
+    if request.method == 'POST':
+        user = request.user
+        logout(request)
+        user.delete()
+        return redirect('tela_principal')
+    return render(request, 'deletar_usuario.html')

@@ -1,0 +1,48 @@
+<!-- filepath: app/templates/editar_usuario.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Editar Usuário</title>
+  <link rel="stylesheet" href="{% static 'registroUser.css' %}" />
+</head>
+<body>
+  <div class="container">
+    <h1>Editar Perfil</h1>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      <div class="field">
+        {{ form.username.label_tag }}
+        {{ form.username }}
+        {{ form.username.errors }}
+      </div>
+      <div class="field">
+        {{ form.email.label_tag }}
+        {{ form.email }}
+        {{ form.email.errors }}
+      </div>
+      <div class="field">
+        {{ form.lugar_mora.label_tag }}
+        {{ form.lugar_mora }}
+        {{ form.lugar_mora.errors }}
+      </div>
+      <div class="field">
+        {{ form.vehicle_type.label_tag }}
+        {{ form.vehicle_type }}
+        {{ form.vehicle_type.errors }}
+      </div>
+      <button type="submit" class="btn">Salvar Alterações</button>
+    </form>
+    <form method="post" action="{% url 'deletar_usuario' %}" style="margin-top: 2em;">
+      {% csrf_token %}
+      <button type="submit" class="btn" style="background: #c00; color: #fff;">Deletar Conta</button>
+    </form>
+    <p class="login-link">
+      <a href="{% url 'tela_principal' %}">Voltar para a página inicial</a>
+    </p>
+  </div>
+</body>
+</html>

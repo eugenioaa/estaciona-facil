@@ -1,0 +1,21 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Deletar Conta</title>
+  <link rel="stylesheet" href="{% static 'registroUser.css' %}" />
+</head>
+<body>
+  <div class="container">
+    <h1>Deletar Conta</h1>
+    <form method="post">
+      {% csrf_token %}
+      <p>Tem certeza que deseja deletar sua conta? Esta ação não poderá ser desfeita.</p>
+      <button type="submit" class="btn" style="background: #c00; color: #fff;">Deletar Conta</button>
+      <a href="{% url 'editar_usuario' %}" class="btn">Cancelar</a>
+    </form>
+  </div>
+</body>
+</html>

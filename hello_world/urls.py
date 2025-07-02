@@ -31,6 +31,8 @@ urlpatterns = [
     path('registroUsuario/', register_view, name='register'),
     path('registroEstacionamento/', registerEstacionamento_view, name='register_estacionamento'),
     path('login/', login_view, name='login'),
+    path('editar/', editar_usuario_view, name='editar_usuario'),
+    path('deletar/', deletar_usuario_view, name='deletar_usuario'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
