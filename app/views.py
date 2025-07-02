@@ -11,7 +11,7 @@ from .models import HistoricoOcupacao
 def historico_ocupacao_view(request):
     # Busca todos os registros de histórico no banco de dados
     historico = HistoricoOcupacao.objects.all()
-
+    # Cria um dicionário de contexto para enviar os dados para o template
     # Cria um dicionário de contexto para enviar os dados para o template
     context = {
         'historico_list': historico
