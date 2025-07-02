@@ -1,7 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import Avaliacao, Usuario, Estacionamento
-
+# app/forms.py
+from .models import Avaliacao, Usuario, Estacionamento, HistoricoOcupacao
 class AvaliacaoForm(forms.ModelForm):
     """
     Formulário para submissão de avaliações de estacionamentos.
@@ -83,4 +84,24 @@ class EstacionamentoForm(forms.ModelForm):
         widgets = {
             'horario_abertura': forms.TimeInput(attrs={'type': 'time'}),
             'horario_fechamento': forms.TimeInput(attrs={'type': 'time'}),
+        }
+
+# app/forms.py
+
+class HistoricoOcupacaoForm(forms.ModelForm):
+    """
+    Formulário para registrar a ocupação de um estacionamento em um dado momento.
+    """
+    class Meta:
+        model = HistoricoOcupacao
+        # Mostramos apenas o campo que o usuário precisa preencher.
+        # O 'estacionamento' seria definido na view (ex: pela URL da página)
+        # e o 'timestamp' é preenchido automaticamente.
+        fields = ['vagas_ocupadas']
+        
+        labels = {
+            'vagas_ocupadas': 'Número de Vagas Ocupadas Agora',
+        }
+        widgets = {
+            'vagas_ocupadas': forms.NumberInput(attrs={'placeholder': 'Ex: 42', 'required': True}),
         }

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
 
 class Usuario(AbstractUser):
     """
@@ -14,8 +15,7 @@ class Usuario(AbstractUser):
     ]
     vehicle_type = models.CharField(
         'utiliza veículo',
-        max_length=10,
-        choices=VEHICLE_CHOICES,
+        max_length=50,
         blank=True,
         null=True,
     )
@@ -91,3 +91,15 @@ class Avaliacao(models.Model):
         return round(
             (self.nota_seguranca + self.nota_praticidade + self.nota_preco + self.nota_disponibilidade) / 4, 2
         )
+
+
+class HistoricoOcupacao(models.Model):
+    estacionamento = models.ForeignKey(Estacionamento, on_delete=models.CASCADE, related_name='historico')
+    vagas_ocupadas = models.PositiveIntegerField()
+    timestamp = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"{self.estacionamento.nome} - {self.vagas_ocupadas} vagas em {self.timestamp.strftime('%d/%m/%Y %H:%M')}"
+
+    class Meta:
+        ordering = ['-timestamp']
