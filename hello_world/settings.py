@@ -146,4 +146,4 @@ MEDIA_URL = "media/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Redirecionamento para criar conta se não estiver logado
-LOGIN_URL = '/registroUsuario/'
+LOGIN_URL = '/registrarUsuario/'

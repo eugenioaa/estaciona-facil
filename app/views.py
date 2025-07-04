@@ -84,8 +84,11 @@ def register_view(request):
 
 
 def register_estacionamento_view(request):
-    # TODO: implementar a view de registro de estacionamento
-    pass
+    form = EstacionamentoForm(request.POST or None)
+    if form.is_valid():
+        form.save()
+        return redirect("sistema_avaliacao")
+    return render(request, "registroEstacionamento.html", {"form": form})
 
 
 class LoginForm(forms.Form):
