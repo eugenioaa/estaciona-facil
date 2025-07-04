@@ -1,12 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import AvaliacaoForm, UsuarioRegistrationForm, EstacionamentoForm
-from .models import Estacionamento, Avaliacao
+from .models import Estacionamento, Avaliacao, HistoricoOcupacao
 from django.db.models import Avg
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login as auth_login
+from django.contrib.auth import logout
 from django import forms
-from django.shortcuts import render
-from .models import HistoricoOcupacao
 
 def historico_ocupacao_view(request):
     # Busca todos os registros de histórico no banco de dados
@@ -20,9 +19,10 @@ def historico_ocupacao_view(request):
     # CORRIGIDO: Renderiza o template com o caminho correto
     return render(request, 'historico.html', context)
 
-
 def telaPrincipal(request):
-    return render(request, "telaPrincipal.html")
+    # Busca as 5 últimas avaliações com comentário não vazio
+    ultimas_avaliacoes = Avaliacao.objects.filter(comentario__isnull=False).exclude(comentario='').order_by('-id')[:5]
+    return render(request, "telaPrincipal.html", {"ultimas_avaliacoes": ultimas_avaliacoes})
 
 
 def sistemaAval(request):
@@ -104,3 +104,30 @@ def login_view(request):
         else:
             form.add_error(None, 'Usuário ou senha inválidos.')
     return render(request, 'login.html', {'form': form})
+
+@login_required
+def editar_usuario_view(request):
+    if not request.user.is_authenticated:
+        return redirect('register')
+    user = request.user
+    if request.method == 'POST':
+        form = UsuarioRegistrationForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect('tela_principal')
+    else:
+        form = UsuarioRegistrationForm(instance=user)
+    return render(request, 'editarUser.html', {'form': form})
+
+@login_required
+def deletar_usuario_view(request):
+    if request.method == 'POST':
+        user = request.user
+        logout(request)
+        user.delete()
+        return redirect('tela_principal')
+    return render(request, 'deletar_usuario.html')
+
+def logout_view(request):
+    logout(request)
+    return redirect('tela_principal')

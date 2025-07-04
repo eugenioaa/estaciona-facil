@@ -25,7 +25,9 @@ urlpatterns += [
     path("registrarUsuario/", register_view, name="register"),
     path("registroEstacionamento/", register_estacionamento_view, name="register_estacionamento"),
     path("login/", login_view, name="login"),
-    
+    path('editar/', editar_usuario_view, name='editar_usuario'),
+    path('deletar/', deletar_usuario_view, name='deletar_usuario'),
+    path('logout/', logout_view, name='logout'),
     # Se você tiver a URL "__reload__/", pode adicioná-la aqui
     path("__reload__/", include("django_browser_reload.urls")),
 ]

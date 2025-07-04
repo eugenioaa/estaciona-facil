@@ -79,3 +79,9 @@ button:hover {
 .menu .ativo:hover {
   background-color: #c9a100;
 }
+
+.estrelas {
+  color: #FFCC00;
+  font-size: 1.2em;
+  vertical-align: middle;
+}
