@@ -6,7 +6,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Document</title>
+  <title>EstacionaFácil</title>
   <link rel="stylesheet" href="{% static 'telaPrincipal.css' %}" />
 </head>
 <body>
@@ -46,12 +46,23 @@
 
   <div id="avaliacoes" class="caixa">
     <h3>Últimas Avaliações adicionadas</h3>
-    <div class="avaliacao">
-      ⭐⭐⭐⭐☆ — Muito útil e intuitivo!
-    </div>
-    <div class="avaliacao">
-      ⭐⭐⭐⭐⭐ — Ajudou muito no meu planejamento!
-    </div>
+    {% for avaliacao in ultimas_avaliacoes %}
+      <div class="avaliacao" style="border-bottom:1px solid #ccc; margin-bottom:1em; padding-bottom:1em;">
+        <strong>{{ avaliacao.usuario.username }}</strong> —
+        <span>{{ avaliacao.estacionamento.nome }}</span> —
+        <span class="estrelas">
+          {% with media=avaliacao.media_avaliacao %}
+            {% for i in "12345" %}
+              {% if forloop.counter <= media %}★{% else %}☆{% endif %}
+            {% endfor %}
+            <span style="font-size:0.9em; color:#888;">({{ media }})</span>
+          {% endwith %}
+        </span><br>
+        {{ avaliacao.comentario }}
+      </div>
+    {% empty %}
+      <div class="avaliacao">Nenhuma avaliação ainda.</div>
+    {% endfor %}
   </div>
 
   <script>

@@ -40,6 +40,7 @@
       {% csrf_token %}
       <button type="submit" class="btn" style="background: #c00; color: #fff;">Deletar Conta</button>
     </form>
+    <a href="{% url 'logout' %}" class="btn" style="background: #888; color: #fff; margin-top: 1em; display: inline-block;">Sair da Conta</a>
     <p class="login-link">
       <a href="{% url 'tela_principal' %}">Voltar para a página inicial</a>
     </p>

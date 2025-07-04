@@ -8,7 +8,9 @@ from django import forms
 from django.contrib.auth import logout
 
 def telaPrincipal(request):
-    return render(request, "telaPrincipal.html")
+    # Busca as 5 últimas avaliações com comentário não vazio
+    ultimas_avaliacoes = Avaliacao.objects.filter(comentario__isnull=False).exclude(comentario='').order_by('-id')[:5]
+    return render(request, "telaPrincipal.html", {"ultimas_avaliacoes": ultimas_avaliacoes})
 
 
 def sistemaAval(request):
@@ -96,6 +98,8 @@ def login_view(request):
 
 @login_required
 def editar_usuario_view(request):
+    if not request.user.is_authenticated:
+        return redirect('register')
     user = request.user
     if request.method == 'POST':
         form = UsuarioRegistrationForm(request.POST, instance=user)
@@ -114,3 +118,7 @@ def deletar_usuario_view(request):
         user.delete()
         return redirect('tela_principal')
     return render(request, 'deletar_usuario.html')
+
+def logout_view(request):
+    logout(request)
+    return redirect('tela_principal')

@@ -69,9 +69,18 @@
     <section class="avaliacoes caixa">
       <h2>Avaliações dos Usuários</h2>
       {% for avaliacao in avaliacoes %}
-        <div class="avaliacao">
-          <strong>{{ avaliacao.usuario.username }}</strong><br>
-          “{{ avaliacao.comentario }}”
+        <div class="avaliacao" style="border-bottom:1px solid #ccc; margin-bottom:1em; padding-bottom:1em;">
+          <strong>{{ avaliacao.usuario.username }}</strong> —
+          <span>{{ avaliacao.estacionamento.nome }}</span> —
+          <span class="estrelas">
+            {% with media=avaliacao.media_avaliacao %}
+              {% for i in "12345" %}
+                {% if forloop.counter <= media %}★{% else %}☆{% endif %}
+              {% endfor %}
+              <span style="font-size:0.9em; color:#888;">({{ media }})</span>
+            {% endwith %}
+          </span><br>
+          {{ avaliacao.comentario }}
         </div>
       {% empty %}
         <p>Nenhuma avaliação ainda. Seja o primeiro a avaliar!</p>
