@@ -1,11 +1,23 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import AvaliacaoForm, UsuarioRegistrationForm, EstacionamentoForm
-from .models import Estacionamento, Avaliacao
+from .models import Estacionamento, Avaliacao, HistoricoOcupacao
 from django.db.models import Avg
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login as auth_login
-from django import forms
 from django.contrib.auth import logout
+from django import forms
+
+def historico_ocupacao_view(request):
+    # Busca todos os registros de histórico no banco de dados
+    historico = HistoricoOcupacao.objects.all()
+    # Cria um dicionário de contexto para enviar os dados para o template
+    # Cria um dicionário de contexto para enviar os dados para o template
+    context = {
+        'historico_list': historico
+    }
+
+    # CORRIGIDO: Renderiza o template com o caminho correto
+    return render(request, 'historico.html', context)
 
 def telaPrincipal(request):
     # Busca as 5 últimas avaliações com comentário não vazio
@@ -71,12 +83,9 @@ def register_view(request):
     return render(request, "registroUser.html", {"form": form})
 
 
-def registerEstacionamento_view(request):
-    form = EstacionamentoForm(request.POST or None)
-    if form.is_valid():
-        form.save()
-        return redirect("sistema_avaliacao")
-    return render(request, "registroEstacionamento.html", {"form": form})
+def register_estacionamento_view(request):
+    # TODO: implementar a view de registro de estacionamento
+    pass
 
 
 class LoginForm(forms.Form):
