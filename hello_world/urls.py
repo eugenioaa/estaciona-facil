@@ -5,8 +5,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-# 1. IMPORTAÇÃO CORRETA E LIMPA (como você fez)
-from app.views import telaPrincipal, register_view, register_estacionamento_view, login_view, sistemaAval
+from app.views import logout_view, telaPrincipal, register_view, register_estacionamento_view, login_view, sistemaAval, editar_usuario_view, deletar_usuario_view
 
 
 # --- Bloco 1: Inicia a nossa lista de URLs ---
