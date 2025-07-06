@@ -5,7 +5,7 @@ body {
   background-color: #a3a2a2; /* cinza claro */
 }
 
-/* Botões amarelo claro */
+/* Estilos gerais para botões (se tiver outros na página) */
 button {
   padding: 10px 20px;
   font-size: 18px;
@@ -31,14 +31,12 @@ button:hover {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Notificações */
 #notificacoes {
   text-align: left;
   height: 120px;
   overflow-y: auto;
 }
 
-/* Avaliações */
 #avaliacoes .avaliacao {
   margin-bottom: 10px;
 }
@@ -57,7 +55,8 @@ button:hover {
   height: 50px;
 }
 
-.menu button {
+/* ESTILOS ATUALIZADOS PARA O MENU DE NAVEGAÇÃO */
+.menu .button-link {
   margin-left: 10px;
   padding: 8px 16px;
   font-size: 16px;
@@ -66,17 +65,19 @@ button:hover {
   cursor: pointer;
   background-color: #666666; /* cinza para não ativo */
   color: white;
+  text-decoration: none;
+  display: inline-block;
 }
 
-.menu button:hover {
+.menu .button-link:hover {
   background-color: #555555;
 }
 
-.menu .ativo {
+.menu .button-link.ativo {
   background-color: #FFCC00; /* amarelo claro */
 }
 
-.menu .ativo:hover {
+.menu .button-link.ativo:hover {
   background-color: #c9a100;
 }
 

@@ -1,0 +1,111 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Interativo - Estaciona Fácil</title>
+    
+    <!-- CORREÇÃO FINAL: O caminho agora está correto para a sua estrutura de pastas -->
+    <link rel="stylesheet" href="{% static 'mapa_interativo.css' %}">
+    
+    <!-- Links para o Leaflet (mapa) e Font Awesome (ícones) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+    <header>
+        <nav class="menu">
+            <a class="button-link" href="{% url 'app:tela_principal' %}">Início</a>
+            <a class="button-link ativo" href="{% url 'app:mapa_interativo' %}">Mapa</a>
+            <a class="button-link" href="{% url 'app:tela_avaliacoes' %}">Avaliação</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="page-layout">
+            <section class="map-container">
+                <div id="map"></div>
+            </section>
+            <aside id="details-card" class="location-details-card hidden">
+                <button id="close-details" class="close-button">&times;</button>
+                <div class="image-placeholder">
+                    <img id="details-img" src="" alt="Foto do estacionamento">
+                    <i id="details-img-icon" class="fa-regular fa-image"></i>
+                </div>
+                <div class="location-info">
+                    <h3 id="details-nome">Nome do Estacionamento</h3>
+                    <p id="details-endereco" class="address">📍 Endereço</p>
+                    <div class="info-row">
+                        <span class="info-label">Disponibilidade:</span>
+                        <span id="details-disponibilidade" class="availability"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Horário:</span>
+                        <span id="details-horario" class="hours"><i class="fa-regular fa-clock"></i><span></span></span>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <!-- Scripts no final do body -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    {{ estacionamentos_json|json_script:"estacionamentos-data" }}
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const map = L.map('map').setView([-22.9068, -43.1729], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        const dataElement = document.getElementById('estacionamentos-data');
+        const estacionamentosData = dataElement ? JSON.parse(dataElement.textContent) : [];
+        
+        const estacionamentos = estacionamentosData.map(item => ({
+            id: item.pk,
+            ...item.fields
+        }));
+
+        const detailsCard = document.getElementById('details-card');
+        const closeButton = document.getElementById('close-details');
+        
+        function showDetails(estacionamento) {
+            document.getElementById('details-nome').textContent = estacionamento.nome;
+            document.getElementById('details-endereco').textContent = `📍 ${estacionamento.endereco}`;
+            
+            const disponibilidadeSpan = document.getElementById('details-disponibilidade');
+            disponibilidadeSpan.textContent = estacionamento.disponibilidade.charAt(0).toUpperCase() + estacionamento.disponibilidade.slice(1);
+            disponibilidadeSpan.className = 'availability status-' + estacionamento.disponibilidade;
+
+            document.querySelector('#details-horario span').textContent = `${estacionamento.horario_abertura.slice(0,5)} - ${estacionamento.horario_fechamento.slice(0,5)}`;
+
+            const imgElement = document.getElementById('details-img');
+            const iconElement = document.getElementById('details-img-icon');
+            if (estacionamento.imagem_url) {
+                imgElement.src = estacionamento.imagem_url;
+                imgElement.style.display = 'block';
+                iconElement.style.display = 'none';
+            } else {
+                imgElement.style.display = 'none';
+                iconElement.style.display = 'block';
+            }
+            detailsCard.classList.remove('hidden');
+        }
+
+        estacionamentos.forEach(est => {
+            if (est.latitude && est.longitude) {
+                const marker = L.marker([est.latitude, est.longitude]).addTo(map);
+                marker.bindPopup(`<b>${est.nome}</b>`);
+                marker.on('click', () => showDetails(est));
+            }
+        });
+
+        closeButton.addEventListener('click', () => {
+            detailsCard.classList.add('hidden');
+        });
+    });
+    </script>
+</body>
+</html>

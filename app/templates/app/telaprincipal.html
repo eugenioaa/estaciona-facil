@@ -14,15 +14,23 @@
     <div class="logo">
       <img src="https://img.freepik.com/vetores-premium/pin-de-vetor-de-modelo-de-logotipo-de-estacionamento-de-carros_316488-5081.jpg" alt="Logo do Projeto" />
     </div>
-    <nav class="menu">
-      <button class="ativo" onclick="location.href='index.html'">Início</button>
-      <button onclick="location.href='mapa.html'">Mapa</button>
-      <button onclick="location.href='simulador.html'">Simulador</button>
-      <button onclick="location.href='{% url 'sistema_avaliacao' %}'">Avaliação</button>
-      <button onclick="location.href='{% url 'register' %}'">Criar Conta</button>
-      <button onclick="window.location.href='{% url 'register_estacionamento' %}'">Cadastrar Estacionamento</button>
-      <button onclick="location.href='{% url 'editar_usuario' %}'">Conta</button>
-    </nav>
+  <!-- Caminho: app/templates/app/telaprincipal.html -->
+
+<nav class="menu">
+    <a class="button-link ativo" href="{% url 'app:tela_principal' %}">Início</a>
+    <a class="button-link" href="{% url 'app:mapa_interativo' %}">Mapa</a>
+    <a class="button-link" href="{% url 'app:tela_avaliacoes' %}">Avaliação</a>
+
+    {% if user.is_authenticated %}
+        <!-- Links para utilizadores autenticados -->
+        <a class="button-link" href="{% url 'app:editar_usuario' %}">Conta</a>
+        <a class="button-link" href="{% url 'app:logout' %}">Logout</a>
+    {% else %}
+        <!-- Links para utilizadores não autenticados -->
+        <a class="button-link" href="{% url 'app:registro_usuario' %}">Criar Conta</a>
+        <a class="button-link" href="{% url 'app:login' %}">Login</a>
+    {% endif %}
+</nav>
   </header>
 
   <h1>Encontre o melhor lugar para estacionar o seu carro</h1>

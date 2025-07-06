@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 
+
 class Usuario(AbstractUser):
     """
     Modelo de usuário personalizado com campos adicionais.
@@ -26,28 +27,62 @@ class Usuario(AbstractUser):
         return f"{self.username} ({self.email})"
 
 
+
+
 class Estacionamento(models.Model):
     """
-    Modelo para armazenar informações sobre um estacionamento.
+    Modelo aprimorado para armazenar informações sobre um estacionamento.
     """
-    DISPONIBILIDADE_CHOICES = [
-        ('baixa', 'Baixa'),
-        ('media', 'Média'),
-        ('alta', 'Alta'),
-    ]
+    class Disponibilidade(models.TextChoices):
+        BAIXA = 'baixa', 'Baixa'
+        MEDIA = 'media', 'Média'
+        ALTA = 'alta', 'Alta'
 
-    nome = models.CharField('Nome', max_length=200)
+    # --- Informações Básicas ---
+    nome = models.CharField(
+        'Nome', 
+        max_length=200, 
+        help_text="Nome comercial do estacionamento."
+    )
     endereco = models.CharField('Endereço', max_length=300)
+    imagem_url = models.URLField('URL da Imagem', max_length=500, blank=True, null=True)
+
+    # --- Localização Geográfica (ESSENCIAL PARA O MAPA) ---
+    latitude = models.FloatField(
+        'Latitude',
+        blank=True, null=True,
+        help_text="Coordenada de latitude para o mapa (ex: -22.9068)."
+    )
+    longitude = models.FloatField(
+        'Longitude',
+        blank=True, null=True,
+        help_text="Coordenada de longitude para o mapa (ex: -43.1729)."
+    )
+
+    # --- Informações Operacionais ---
+    horario_abertura = models.TimeField('Horário de Abertura')
+    horario_fechamento = models.TimeField('Horário de Fechamento')
+    preco_por_hora = models.DecimalField(
+        'Preço por Hora',
+        max_digits=8,
+        decimal_places=2,
+        blank=True, null=True
+    )
+
+    # --- Vagas e Disponibilidade ---
+    vagas_totais = models.PositiveIntegerField('Vagas Totais', blank=True, null=True)
+    vagas_disponiveis = models.PositiveIntegerField('Vagas Disponíveis', blank=True, null=True)
     disponibilidade = models.CharField(
         'Disponibilidade',
         max_length=5,
-        choices=DISPONIBILIDADE_CHOICES,
-        default='media',
+        choices=Disponibilidade.choices,
+        default=Disponibilidade.MEDIA,
+        help_text="Calculado automaticamente se as vagas forem preenchidas."
     )
-    horario_abertura = models.TimeField('Horário de Abertura')
-    horario_fechamento = models.TimeField('Horário de Fechamento')
-    imagem_url = models.URLField('URL da Imagem', max_length=500, blank=True, null=True)
+
+    # --- Metadados ---
     data_criacao = models.DateTimeField('Data de Criação', auto_now_add=True)
+    data_atualizacao = models.DateTimeField('Última Atualização', auto_now=True)
 
     class Meta:
         verbose_name = 'Estacionamento'
@@ -55,7 +90,23 @@ class Estacionamento(models.Model):
         ordering = ['nome']
 
     def __str__(self):
-        return f"{self.nome} - {self.endereco}"
+        return self.nome
+
+    def save(self, *args, **kwargs):
+        """
+        Sobrescreve o método save para atualizar a disponibilidade
+        com base na porcentagem de vagas livres.
+        """
+        if self.vagas_totais is not None and self.vagas_disponiveis is not None and self.vagas_totais > 0:
+            percentual_disponivel = (self.vagas_disponiveis / self.vagas_totais) * 100
+            if percentual_disponivel <= 10:
+                self.disponibilidade = self.Disponibilidade.BAIXA
+            elif 10 < percentual_disponivel <= 50:
+                self.disponibilidade = self.Disponibilidade.MEDIA
+            else:
+                self.disponibilidade = self.Disponibilidade.ALTA
+        
+        super().save(*args, **kwargs)
 
 
 class Avaliacao(models.Model):
