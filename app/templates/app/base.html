@@ -1,0 +1,85 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}EstacionaFácil{% endblock %}</title>
+    
+    <!-- Link para o CSS principal e partilhado -->
+    <link rel="stylesheet" href="{% static 'main.css' %}" />
+    
+    <!-- Ícones para o botão de modo escuro -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <!-- Bloco para que cada página possa adicionar os seus próprios estilos CSS -->
+    {% block styles %}{% endblock %}
+</head>
+<body>
+    <header class="cabecalho">
+        <div class="logo-container">
+            <div class="logo">
+                <img src="https://img.freepik.com/vetores-premium/pin-de-vetor-de-modelo-de-logotipo-de-estacionamento-de-carros_316488-5081.jpg" alt="Logo do Projeto" />
+            </div>
+            <!-- BOTÃO DE MODO ESCURO ADICIONADO AQUI -->
+            <button id="dark-mode-toggle" class="dark-mode-toggle">
+                <i class="fa-solid fa-sun"></i> <!-- Ícone inicial -->
+            </button>
+        </div>
+        <nav class="menu">
+            <a class="button-link {% if request.resolver_match.url_name == 'tela_principal' %}ativo{% endif %}" href="{% url 'app:tela_principal' %}">Início</a>
+            <a class="button-link {% if request.resolver_match.url_name == 'mapa_interativo' %}ativo{% endif %}" href="{% url 'app:mapa_interativo' %}">Mapa</a>
+            <a class="button-link {% if request.resolver_match.url_name == 'tela_avaliacoes' %}ativo{% endif %}" href="{% url 'app:tela_avaliacoes' %}">Avaliação</a>
+
+            {% if user.is_authenticated %}
+                <a class="button-link {% if request.resolver_match.url_name == 'editar_usuario' %}ativo{% endif %}" href="{% url 'app:editar_usuario' %}">Conta</a>
+                <a class="button-link" href="{% url 'app:logout' %}">Logout</a>
+            {% else %}
+                <a class="button-link {% if request.resolver_match.url_name == 'registro_usuario' %}ativo{% endif %}" href="{% url 'app:registro_usuario' %}">Criar Conta</a>
+                <a class="button-link {% if request.resolver_match.url_name == 'login' %}ativo{% endif %}" href="{% url 'app:login' %}">Login</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- SCRIPT PARA O MODO ESCURO ADICIONADO AQUI -->
+    <script>
+        const toggleButton = document.getElementById('dark-mode-toggle');
+        const body = document.body;
+        const icon = toggleButton.querySelector('i');
+
+        // Função para aplicar o tema e o ícone corretos
+        function applyTheme(isDarkMode) {
+            if (isDarkMode) {
+                body.classList.add('dark-mode');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            } else {
+                body.classList.remove('dark-mode');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+        }
+
+        // Verifica a preferência guardada no localStorage ao carregar a página
+        const savedTheme = localStorage.getItem('theme');
+        const isDarkModeSaved = savedTheme === 'dark';
+        applyTheme(isDarkModeSaved);
+
+        // Adiciona o evento de clique ao botão
+        toggleButton.addEventListener('click', () => {
+            const isCurrentlyDark = body.classList.contains('dark-mode');
+            applyTheme(!isCurrentlyDark);
+            
+            // Guarda a nova preferência no localStorage
+            localStorage.setItem('theme', !isCurrentlyDark ? 'dark' : 'light');
+        });
+    </script>
+
+    <!-- Bloco para que cada página possa adicionar os seus próprios scripts JS -->
+    {% block scripts %}{% endblock %}
+</body>
+</html>
