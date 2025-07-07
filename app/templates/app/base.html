@@ -5,15 +5,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}EstacionaFácil{% endblock %}</title>
-    
-    <!-- Link para o CSS principal e partilhado -->
+
     <link rel="stylesheet" href="{% static 'main.css' %}" />
-    
-    <!-- Ícones para o botão de modo escuro -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    
-    <!-- Bloco para que cada página possa adicionar os seus próprios estilos CSS -->
+
     {% block styles %}{% endblock %}
+
+    <script>
+        (function() {
+            try {
+                var theme = localStorage.getItem('theme');
+                if (theme === 'dark') {
+                    document.documentElement.classList.add('dark-mode');
+                }
+            } catch (e) {
+                console.error("Não foi possível aplicar o tema inicial.", e);
+            }
+        })();
+    </script>
+
 </head>
 <body>
     <header class="cabecalho">
@@ -21,10 +31,6 @@
             <div class="logo">
                 <img src="https://img.freepik.com/vetores-premium/pin-de-vetor-de-modelo-de-logotipo-de-estacionamento-de-carros_316488-5081.jpg" alt="Logo do Projeto" />
             </div>
-            <!-- BOTÃO DE MODO ESCURO ADICIONADO AQUI -->
-            <button id="dark-mode-toggle" class="dark-mode-toggle">
-                <i class="fa-solid fa-sun"></i> <!-- Ícone inicial -->
-            </button>
         </div>
         <nav class="menu">
             <a class="button-link {% if request.resolver_match.url_name == 'tela_principal' %}ativo{% endif %}" href="{% url 'app:tela_principal' %}">Início</a>
@@ -38,6 +44,10 @@
                 <a class="button-link {% if request.resolver_match.url_name == 'registro_usuario' %}ativo{% endif %}" href="{% url 'app:registro_usuario' %}">Criar Conta</a>
                 <a class="button-link {% if request.resolver_match.url_name == 'login' %}ativo{% endif %}" href="{% url 'app:login' %}">Login</a>
             {% endif %}
+            
+            <button id="dark-mode-toggle" class="dark-mode-toggle">
+                <i class="fa-solid"></i>
+            </button>
         </nav>
     </header>
 
@@ -45,41 +55,38 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- SCRIPT PARA O MODO ESCURO ADICIONADO AQUI -->
     <script>
-        const toggleButton = document.getElementById('dark-mode-toggle');
-        const body = document.body;
-        const icon = toggleButton.querySelector('i');
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleButton = document.getElementById('dark-mode-toggle');
+            const icon = toggleButton.querySelector('i');
+            const htmlElement = document.documentElement;
 
-        // Função para aplicar o tema e o ícone corretos
-        function applyTheme(isDarkMode) {
-            if (isDarkMode) {
-                body.classList.add('dark-mode');
-                icon.classList.remove('fa-sun');
-                icon.classList.add('fa-moon');
-            } else {
-                body.classList.remove('dark-mode');
-                icon.classList.remove('fa-moon');
-                icon.classList.add('fa-sun');
+            // Função para definir o ícone correto no carregamento da página
+            function setInitialIcon() {
+                if (htmlElement.classList.contains('dark-mode')) {
+                    icon.classList.add('fa-moon');
+                } else {
+                    icon.classList.add('fa-sun');
+                }
             }
-        }
 
-        // Verifica a preferência guardada no localStorage ao carregar a página
-        const savedTheme = localStorage.getItem('theme');
-        const isDarkModeSaved = savedTheme === 'dark';
-        applyTheme(isDarkModeSaved);
+            // Lógica do clique no botão
+            toggleButton.addEventListener('click', () => {
+                const isDarkMode = htmlElement.classList.toggle('dark-mode');
+                
+                // Salva a preferência no localStorage
+                localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
 
-        // Adiciona o evento de clique ao botão
-        toggleButton.addEventListener('click', () => {
-            const isCurrentlyDark = body.classList.contains('dark-mode');
-            applyTheme(!isCurrentlyDark);
-            
-            // Guarda a nova preferência no localStorage
-            localStorage.setItem('theme', !isCurrentlyDark ? 'dark' : 'light');
+                // Atualiza o ícone
+                icon.classList.toggle('fa-sun', !isDarkMode);
+                icon.classList.toggle('fa-moon', isDarkMode);
+            });
+
+            // Define o ícone assim que o DOM estiver pronto
+            setInitialIcon();
         });
     </script>
 
-    <!-- Bloco para que cada página possa adicionar os seus próprios scripts JS -->
     {% block scripts %}{% endblock %}
 </body>
 </html>

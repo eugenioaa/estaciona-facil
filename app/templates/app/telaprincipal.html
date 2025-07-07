@@ -1,94 +1,71 @@
-{% load django_browser_reload %}
+{% extends 'app/base.html' %}
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EstacionaFácil</title>
-  <link rel="stylesheet" href="{% static 'telaPrincipal.css' %}" />
-</head>
-<body>
-  <header class="cabecalho">
-    <div class="logo">
-      <img src="https://img.freepik.com/vetores-premium/pin-de-vetor-de-modelo-de-logotipo-de-estacionamento-de-carros_316488-5081.jpg" alt="Logo do Projeto" />
+{% block title %}Início - EstacionaFácil{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{% static 'telaPrincipal.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Encontre o melhor lugar para estacionar o seu carro</h1>
+    <h1>Bem-vindo à Simulação</h1>
+
+    <button>Simular Agora</button>
+
+    <div class="caixa">
+        <img src="https://bynd.com.br/wp-content/uploads/2019/07/vagas-de-estacionamento.jpg" alt="Imagem de Simulação" style="max-width: 100%; height: auto;" />
     </div>
-  <!-- Caminho: app/templates/app/telaprincipal.html -->
 
-<nav class="menu">
-    <a class="button-link ativo" href="{% url 'app:tela_principal' %}">Início</a>
-    <a class="button-link" href="{% url 'app:mapa_interativo' %}">Mapa</a>
-    <a class="button-link" href="{% url 'app:tela_avaliacoes' %}">Avaliação</a>
+    <div id="notificacoes" class="caixa">
+        <strong>Notificações:</strong>
+        <ul id="notificacoes-lista"></ul>
+    </div>
 
-    {% if user.is_authenticated %}
-        <!-- Links para utilizadores autenticados -->
-        <a class="button-link" href="{% url 'app:editar_usuario' %}">Conta</a>
-        <a class="button-link" href="{% url 'app:logout' %}">Logout</a>
-    {% else %}
-        <!-- Links para utilizadores não autenticados -->
-        <a class="button-link" href="{% url 'app:registro_usuario' %}">Criar Conta</a>
-        <a class="button-link" href="{% url 'app:login' %}">Login</a>
-    {% endif %}
-</nav>
-  </header>
+    <div class="caixa">
+        <h3>Que tal simular em outro horário?</h3>
+        <button>Ir para Simulador de Demanda</button>
+    </div>
 
-  <h1>Encontre o melhor lugar para estacionar o seu carro</h1>
-  <h1>Bem-vindo à Simulação</h1>
+    <div id="avaliacoes" class="caixa">
+        <h3>Últimas Avaliações adicionadas</h3>
+        {% for avaliacao in ultimas_avaliacoes %}
+            <div class="avaliacao">
+                <strong>{{ avaliacao.usuario.username }}</strong> —
+                <span>{{ avaliacao.estacionamento.nome }}</span> —
+                <span class="estrelas">
+                    {% with media=avaliacao.media_avaliacao %}
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= media %}★{% else %}☆{% endif %}
+                        {% endfor %}
+                    {% endwith %}
+                </span><br>
+                {{ avaliacao.comentario }}
+            </div>
+        {% empty %}
+            <div class="avaliacao">Nenhuma avaliação ainda.</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
 
-  <button onclick="location.href='simulacao.html'">Simular Agora</button>
+{% block scripts %}
+    <script>
+        const notificacoes = [
+            "Novo cenário de simulação disponível.",
+            "Demanda atualizada com sucesso.",
+            "Erro corrigido no modelo de previsão.",
+            "Novo feedback recebido."
+        ];
 
-  <div class="caixa">
-    <img src="https://bynd.com.br/wp-content/uploads/2019/07/vagas-de-estacionamento.jpg" alt="Imagem de Simulação" width="600" height="300" />
-  </div>
-
-  <div id="notificacoes" class="caixa">
-    <strong>Notificações:</strong>
-    <ul id="notificacoes-lista"></ul>
-  </div>
-
-  <div class="caixa">
-    <h3>Que tal simular em outro horário?</h3>
-    <button onclick="location.href='simulador_demanda.html'">Ir para Simulador de Demanda</button>
-  </div>
-
-  <div id="avaliacoes" class="caixa">
-    <h3>Últimas Avaliações adicionadas</h3>
-    {% for avaliacao in ultimas_avaliacoes %}
-      <div class="avaliacao" style="border-bottom:1px solid #ccc; margin-bottom:1em; padding-bottom:1em;">
-        <strong>{{ avaliacao.usuario.username }}</strong> —
-        <span>{{ avaliacao.estacionamento.nome }}</span> —
-        <span class="estrelas">
-          {% with media=avaliacao.media_avaliacao %}
-            {% for i in "12345" %}
-              {% if forloop.counter <= media %}★{% else %}☆{% endif %}
-            {% endfor %}
-            <span style="font-size:0.9em; color:#888;">({{ media }})</span>
-          {% endwith %}
-        </span><br>
-        {{ avaliacao.comentario }}
-      </div>
-    {% empty %}
-      <div class="avaliacao">Nenhuma avaliação ainda.</div>
-    {% endfor %}
-  </div>
-
-  <script>
-    const notificacoes = [
-      "Novo cenário de simulação disponível.",
-      "Demanda atualizada com sucesso.",
-      "Erro corrigido no modelo de previsão.",
-      "Novo feedback recebido."
-    ];
-
-    let index = 0;
-    setInterval(() => {
-      if (index < notificacoes.length) {
-        const li = document.createElement("li");
-        li.textContent = notificacoes[index++];
-        document.getElementById("notificacoes-lista").appendChild(li);
-      }
-    }, 2000);
-  </script>
-</body>
-</html>
+        let index = 0;
+        setInterval(() => {
+            if (index < notificacoes.length) {
+                const li = document.createElement("li");
+                li.textContent = notificacoes[index++];
+                document.getElementById("notificacoes-lista").appendChild(li);
+            }
+        }, 2000);
+    </script>
+{% endblock %}

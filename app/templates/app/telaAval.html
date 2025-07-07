@@ -1,34 +1,14 @@
+{% extends 'app/base.html' %}
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Avaliações de Estacionamento</title>
-    <!-- CORRIGIDO: O link agora aponta para o seu ficheiro de estilos existente -->
-    <link rel="stylesheet" href="{% static 'styles.css' %}" />
-</head>
-<body>
-    <header class="cabecalho">
-        <div class="logo">
-            <img src="https://img.freepik.com/vetores-premium/pin-de-vetor-de-modelo-de-logotipo-de-estacionamento-de-carros_316488-5081.jpg" alt="Logo do Projeto" />
-        </div>
-        
-        <nav class="menu">
-            <a class="button-link" href="{% url 'app:tela_principal' %}">Início</a>
-            <a class="button-link ativo" href="{% url 'app:tela_avaliacoes' %}">Avaliação</a>
-            
-            {% if user.is_authenticated %}
-                <a class="button-link" href="{% url 'app:editar_usuario' %}">Conta</a>
-                <a class="button-link" href="{% url 'app:logout' %}">Logout</a>
-            {% else %}
-                <a class="button-link" href="{% url 'app:registro_usuario' %}">Criar Conta</a>
-                <a class="button-link" href="{% url 'app:login' %}">Login</a>
-            {% endif %}
-        </nav>
-    </header>
+{% block title %}Avaliações - EstacionaFácil{% endblock %}
 
+{% block styles %}
+    <link rel="stylesheet" href="{% static 'telaAval.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="container">
     <h1>Sistema de Avaliações de Estacionamentos</h1>
 
     {# 1) Seletor de estacionamento #}
@@ -46,9 +26,11 @@
         </form>
     </section>
 
-    {# 2) Se nenhum escolhido ainda, mostra mensagem #}
+    {# 2) Mensagem se nenhum estacionamento for escolhido #}
     {% if not estacionamento %}
-        <p class="caixa">Selecione um estacionamento acima para ver detalhes e avaliações.</p>
+        <div class="caixa" style="text-align: center;">
+            <p>Selecione um estacionamento acima para ver detalhes e avaliações.</p>
+        </div>
     {% else %}
 
         {# 3) Informações do estacionamento selecionado #}
@@ -58,13 +40,13 @@
             {% endif %}
             <div>
                 <h2>{{ estacionamento.nome }}</h2>
-                <p>Endereço: {{ estacionamento.endereco }}</p>
-                <p>Disponibilidade: {{ estacionamento.get_disponibilidade_display }}</p>
-                <p>Horário de Funcionamento: {{ estacionamento.horario_abertura|time:"H:i" }} às {{ estacionamento.horario_fechamento|time:"H:i" }}</p>
+                <p><strong>Endereço:</strong> {{ estacionamento.endereco }}</p>
+                <p><strong>Disponibilidade:</strong> {{ estacionamento.get_disponibilidade_display }}</p>
+                <p><strong>Horário:</strong> {{ estacionamento.horario_abertura|time:"H:i" }} às {{ estacionamento.horario_fechamento|time:"H:i" }}</p>
             </div>
         </section>
 
-        {# 4) Avaliação média (passada no contexto pela view) #}
+        {# 4) Avaliação média #}
         <section class="avaliacoes caixa">
             <h3>Avaliação Média</h3>
             <p>Segurança: <span class="estrelas">{{ media_seguranca }}</span></p>
@@ -75,28 +57,30 @@
 
         {# 5) Lista de avaliações individuais #}
         <section class="avaliacoes caixa">
-            <h2>Avaliações dos Usuários</h2>
+            <h3>Avaliações dos Usuários</h3>
             {% for avaliacao in avaliacoes %}
-                <div class="avaliacao" style="border-bottom:1px solid #ccc; margin-bottom:1em; padding-bottom:1em;">
-                    <strong>{{ avaliacao.usuario.username|default:"Anónimo" }}</strong> —
-                    <span class="estrelas">
+                <div class="avaliacao">
+                    <p>
+                        <strong>{{ avaliacao.usuario.username|default:"Anônimo" }}</strong> —
+                        <span class="estrelas">
                         {% with media=avaliacao.media_avaliacao %}
                             {% for i in "12345" %}
-                                {% if forloop.counter <= media %}★{% else %}☆{% endif %}
+                                {% if forloop.counter <= media|add:0 %}★{% else %}☆{% endif %}
                             {% endfor %}
-                            <span style="font-size:0.9em; color:#888;">({{ media }})</span>
                         {% endwith %}
-                    </span><br>
-                    {{ avaliacao.comentario }}
+                        </span>
+                        <br>
+                        <em>{{ avaliacao.comentario }}</em>
+                    </p>
                 </div>
             {% empty %}
                 <p>Nenhuma avaliação ainda. Seja o primeiro a avaliar!</p>
             {% endfor %}
         </section>
 
-        {# 6) Formulário para deixar nova avaliação #}
+        {# 6) Formulário para nova avaliação #}
         <section class="formulario caixa">
-            <h2>Deixe sua Avaliação</h2>
+            <h3>Deixe sua Avaliação</h3>
             <form method="post">
                 {% csrf_token %}
                 {{ avaliacao_form.as_p }}
@@ -104,5 +88,5 @@
             </form>
         </section>
     {% endif %}
-</body>
-</html>
+</div>
+{% endblock %}

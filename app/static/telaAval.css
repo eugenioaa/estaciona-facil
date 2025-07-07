@@ -1,0 +1,110 @@
+/* Estilos para a página de Avaliações */
+
+/* Usa o container padrão, mas adiciona um cabeçalho centralizado */
+.container h1 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* Estilo padrão para as caixas de conteúdo */
+.caixa {
+    background-color: var(--cor-fundo);
+    border: 1px solid var(--cor-neutra-clara);
+    color: var(--cor-texto);
+    border-radius: 10px;
+    padding: 25px;
+    width: 90%;
+    max-width: 900px;
+    margin: 25px auto;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: background-color 0.3s, color 0.3s, border 0.3s;
+}
+
+/* Seção de seleção de estacionamento */
+.selecionar-estacionamento select {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 5px;
+    border: 1px solid var(--cor-neutra-media);
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto);
+}
+
+/* Informações do estacionamento */
+.estacionamento-info {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.estacionamento-info .estacionamento-img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.estacionamento-info h2 {
+    margin-top: 0;
+}
+
+/* Seção de avaliações */
+.avaliacoes p, .avaliacoes .avaliacao {
+    line-height: 1.6;
+}
+
+.estrelas {
+    color: var(--cor-primaria);
+    font-size: 1.3em;
+    vertical-align: middle;
+}
+
+.avaliacao {
+    border-bottom: 1px solid var(--cor-neutra-clara);
+    margin-bottom: 1em;
+    padding-bottom: 1em;
+}
+
+.avaliacao:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+/* Formulário */
+.formulario form p {
+    margin-bottom: 15px;
+}
+
+.formulario label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.formulario input, .formulario textarea {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box; /* Garante que padding não afete a largura final */
+    border: 1px solid var(--cor-neutra-media);
+    border-radius: 5px;
+}
+
+.formulario button.btn {
+    display: inline-block;
+    padding: 12px 25px;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: none;
+    background-color: var(--cor-primaria);
+    color: #1C1C1C;
+    cursor: pointer;
+    font-weight: bold;
+    transition: filter 0.2s;
+    margin-top: 10px;
+}
+
+.formulario button.btn:hover {
+    filter: brightness(0.9);
+}
