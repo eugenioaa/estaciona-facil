@@ -1,62 +1,117 @@
-{% load django_browser_reload %}
+{% extends 'app/base.html' %}
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cadastro de Usuário</title>
-  <link rel="stylesheet" href="{% static 'registroUser.css' %}" />
-</head>
-<body>
-  <div class="container">
+{% block title %}Cadastro de Usuário - EstacionaFácil{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{% static 'forms.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
     <h1>Crie sua conta</h1>
     <form method="post" novalidate>
-      {% csrf_token %}
-      {{ form.non_field_errors }}
-      
-      <div class="field">
-        {{ form.username.label_tag }}
-        {{ form.username }}
-        {{ form.username.errors }}
-      </div>
-      
-      <div class="field">
-        {{ form.email.label_tag }}
-        {{ form.email }}
-        {{ form.email.errors }}
-      </div>
-      
-      <div class="field">
-        {{ form.password1.label_tag }}
-        {{ form.password1 }}
-        {{ form.password1.errors }}
-      </div>
-      
-      <div class="field">
-        {{ form.password2.label_tag }}
-        {{ form.password2 }}
-        {{ form.password2.errors }}
-      </div>
-      
-      <div class="field">
-        {{ form.lugar_mora.label_tag }}
-        {{ form.lugar_mora }}
-        {{ form.lugar_mora.errors }}
-      </div>
-      
-      <div class="field">
-        {{ form.vehicle_type.label_tag }}
-        {{ form.vehicle_type }}
-        {{ form.vehicle_type.errors }}
-      </div>
-      
-      <button type="submit" class="btn">Registrar</button>
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        
+        <div class="field">{{ form.username.label_tag }}{{ form.username }}{{ form.username.errors }}</div>
+        <div class="field">{{ form.email.label_tag }}{{ form.email }}{{ form.email.errors }}</div>
+        <div class="field">{{ form.password.label_tag }}{{ form.password }}{{ form.password.errors }}</div>
+        <div class="field">{{ form.password2.label_tag }}{{ form.password2 }}{{ form.password2.errors }}</div>
+        
+        <!-- CAMPO DE BAIRRO COM AUTOCOMPLETE -->
+        <div class="field">
+            {{ form.lugar_mora_nome.label_tag }}
+            <div class="autocomplete-container">
+                {{ form.lugar_mora_nome }}
+                <ul id="suggestions-list" class="suggestions-list"></ul>
+            </div>
+            {{ form.lugar_mora_nome.errors }}
+        </div>
+        {{ form.lugar_mora }} <!-- Campo escondido para o ID -->
+
+        <div class="field">{{ form.vehicle_type.label_tag }}{{ form.vehicle_type }}{{ form.vehicle_type.errors }}</div>
+        
+        <button type="submit" class="btn">Registrar</button>
     </form>
     <p class="login-link">
-      Já tem conta? <a href="/login/">Faça login</a>
+      Já tem conta? <a href="{% url 'app:login' %}">Faça login</a>
     </p>
-  </div>
-</body>
-</html>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const bairroNomeInput = document.querySelector('.bairro-autocomplete');
+    const bairroIdInput = document.getElementById('id_lugar_mora');
+    const suggestionsList = document.getElementById('suggestions-list');
+
+    if (bairroNomeInput && bairroIdInput && suggestionsList) {
+        console.log("Autocomplete iniciado com sucesso!"); // DEBUG
+
+        bairroNomeInput.addEventListener('input', function() {
+            const query = bairroNomeInput.value;
+            console.log(`Utilizador digitou: ${query}`); // DEBUG
+
+            // Limpa o ID escondido se o utilizador apagar o texto
+            if (query.trim() === '') {
+                bairroIdInput.value = '';
+                suggestionsList.classList.remove('visible');
+                return;
+            }
+
+            // Faz a chamada à API
+            fetch(`/api/search-bairros/?q=${query}`)
+                .then(response => {
+                    console.log("Resposta da API recebida:", response.status, response.statusText); // DEBUG
+                    if (!response.ok) {
+                        throw new Error('A resposta da rede não foi ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Dados recebidos:", data); // DEBUG
+                    suggestionsList.innerHTML = ''; // Limpa sugestões antigas
+                    if (data.length > 0) {
+                        suggestionsList.classList.add('visible');
+                        data.forEach(bairro => {
+                            const li = document.createElement('li');
+                            li.textContent = bairro.nome;
+                            li.dataset.id = bairro.id;
+                            suggestionsList.appendChild(li);
+                        });
+                    } else {
+                        suggestionsList.classList.remove('visible');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar sugestões:', error); // DEBUG
+                    suggestionsList.classList.remove('visible');
+                });
+        });
+
+        suggestionsList.addEventListener('click', function(e) {
+            if (e.target && e.target.nodeName === 'LI') {
+                const nomeBairro = e.target.textContent;
+                const idBairro = e.target.dataset.id;
+                console.log(`Bairro selecionado: ${nomeBairro} (ID: ${idBairro})`); // DEBUG
+
+                bairroNomeInput.value = nomeBairro;
+                bairroIdInput.value = idBairro;
+                suggestionsList.classList.remove('visible');
+            }
+        });
+
+        // Opcional: fechar sugestões ao clicar fora
+        document.addEventListener('click', function(e) {
+            if (!bairroNomeInput.contains(e.target)) {
+                suggestionsList.classList.remove('visible');
+            }
+        });
+    } else {
+        console.error("Não foi possível encontrar os elementos do autocomplete no DOM."); // DEBUG
+    }
+});
+</script>
+{% endblock %}

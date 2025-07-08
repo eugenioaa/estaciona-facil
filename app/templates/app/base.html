@@ -11,6 +11,7 @@
 
     {% block styles %}{% endblock %}
 
+    <!-- Script Anti-Piscar (executa antes de tudo) -->
     <script>
         (function() {
             try {
@@ -52,38 +53,36 @@
     </header>
 
     <main>
+        {# O bloco de mensagens foi removido daqui #}
         {% block content %}{% endblock %}
     </main>
 
+    <!-- Script de Interatividade (executa após o conteúdo carregar) -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const toggleButton = document.getElementById('dark-mode-toggle');
-            const icon = toggleButton.querySelector('i');
-            const htmlElement = document.documentElement;
+            if (toggleButton) {
+                const icon = toggleButton.querySelector('i');
+                const htmlElement = document.documentElement;
 
-            // Função para definir o ícone correto no carregamento da página
-            function setInitialIcon() {
-                if (htmlElement.classList.contains('dark-mode')) {
-                    icon.classList.add('fa-moon');
-                } else {
-                    icon.classList.add('fa-sun');
+                function setInitialIcon() {
+                    if (htmlElement.classList.contains('dark-mode')) {
+                        icon.classList.remove('fa-sun');
+                        icon.classList.add('fa-moon');
+                    } else {
+                        icon.classList.remove('fa-moon');
+                        icon.classList.add('fa-sun');
+                    }
                 }
+
+                toggleButton.addEventListener('click', () => {
+                    htmlElement.classList.toggle('dark-mode');
+                    localStorage.setItem('theme', htmlElement.classList.contains('dark-mode') ? 'dark' : 'light');
+                    setInitialIcon();
+                });
+
+                setInitialIcon();
             }
-
-            // Lógica do clique no botão
-            toggleButton.addEventListener('click', () => {
-                const isDarkMode = htmlElement.classList.toggle('dark-mode');
-                
-                // Salva a preferência no localStorage
-                localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-
-                // Atualiza o ícone
-                icon.classList.toggle('fa-sun', !isDarkMode);
-                icon.classList.toggle('fa-moon', isDarkMode);
-            });
-
-            // Define o ícone assim que o DOM estiver pronto
-            setInitialIcon();
         });
     </script>
 

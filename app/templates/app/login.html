@@ -1,33 +1,32 @@
+{% extends 'app/base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login</title>
-  <link rel="stylesheet" href="{% static 'registroUser.css' %}" />
-</head>
-<body>
-  <div class="container">
+
+{% block title %}Login - EstacionaFácil{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{% static 'forms.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
     <h1>Login</h1>
     <form method="post" novalidate>
-      {% csrf_token %}
-      {{ form.non_field_errors }}
-      <div class="field">
-        {{ form.username.label_tag }}
-        {{ form.username }}
-        {{ form.username.errors }}
-      </div>
-      <div class="field">
-        {{ form.password.label_tag }}
-        {{ form.password }}
-        {{ form.password.errors }}
-      </div>
-      <button type="submit" class="btn">Entrar</button>
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="field">
+            {{ form.username.label_tag }}
+            {{ form.username }}
+            {{ form.username.errors }}
+        </div>
+        <div class="field">
+            {{ form.password.label_tag }}
+            {{ form.password }}
+            {{ form.password.errors }}
+        </div>
+        <button type="submit" class="btn">Entrar</button>
     </form>
     <p class="login-link">
-      Não tem conta? <a href="/register/">Cadastre-se</a>
+      Não tem conta? <a href="{% url 'app:registro_usuario' %}">Cadastre-se</a>
     </p>
-  </div>
-</body>
-</html>
+</div>
+{% endblock %}

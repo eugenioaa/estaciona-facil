@@ -4,12 +4,8 @@
 {% block title %}Mapa Interativo - EstacionaFácil{% endblock %}
 
 {% block styles %}
-    <!-- Carrega apenas os estilos específicos para a página do mapa -->
     <link rel="stylesheet" href="{% static 'mapa_interativo.css' %}" />
-    
-    <!-- Links para o Leaflet (mapa) e Font Awesome (ícones) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-
 {% endblock %}
 
 {% block content %}
@@ -26,96 +22,47 @@
     <section class="map-container">
         <div id="map"></div>
     </section>
-
-    <!-- A secção de detalhes agora está vazia e será preenchida pelo JavaScript -->
-    <section id="details-section" class="details-section" style="display: none;">
-        <div class="location-details-card">
-            <div id="details-image-placeholder" class="image-placeholder">
-                <i class="fa-regular fa-image"></i>
-            </div>
-            <div class="location-info">
-                <h3 id="details-nome"></h3>
-                <p id="details-endereco"></p>
-            </div>
-        </div>
-        
-        <div id="details-reviews" class="reviews-container">
-            <!-- As avaliações serão inseridas aqui pelo JavaScript -->
-        </div>
-    </section>
 </div>
 {% endblock %}
 
 {% block scripts %}
-    <!-- Scripts no final do body -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    {{ estacionamentos_json|json_script:"estacionamentos-data" }}
+    
+    <!-- CORREÇÃO: Usamos a nova variável 'estacionamentos_list' -->
+    {{ estacionamentos_list|json_script:"estacionamentos-data" }}
+
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         // --- 1. INICIALIZAÇÃO DO MAPA ---
-        const map = L.map('map').setView([-22.9845, -43.2048], 14); // Centralizado em Ipanema
+        const map = L.map('map').setView([-22.976, -43.227], 14); // Centralizado na Gávea
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        // --- 2. LEITURA DOS DADOS ---
+        // --- 2. LEITURA DOS DADOS (AGORA SIMPLIFICADA) ---
         const dataElement = document.getElementById('estacionamentos-data');
-        const estacionamentosData = dataElement ? JSON.parse(dataElement.textContent) : [];
-        const estacionamentos = estacionamentosData.map(item => ({ id: item.pk, ...item.fields }));
+        
+        // JSON.parse agora vai funcionar corretamente e retornar um array
+        const estacionamentos = JSON.parse(dataElement.textContent); 
 
-        // --- 3. ELEMENTOS DO DOM ---
-        const detailsSection = document.getElementById('details-section');
-        const detailsNome = document.getElementById('details-nome');
-        const detailsEndereco = document.getElementById('details-endereco');
-        const detailsImagePlaceholder = document.getElementById('details-image-placeholder');
-        const detailsReviewsContainer = document.getElementById('details-reviews');
-
-        // --- 4. FUNÇÃO PARA ATUALIZAR OS DETALHES ---
-        function showDetails(estacionamento) {
-            // Atualiza o card de informações básicas
-            detailsNome.textContent = estacionamento.nome;
-            detailsEndereco.textContent = `📍 ${estacionamento.endereco}`;
-            
-            // Limpa e atualiza a imagem (ou mostra o ícone)
-            detailsImagePlaceholder.innerHTML = estacionamento.imagem_url 
-                ? `<img src="${estacionamento.imagem_url}" alt="Foto de ${estacionamento.nome}" style="width:100%; height:100%; object-fit:cover;">`
-                : '<i class="fa-regular fa-image"></i>';
-
-            // Limpa as avaliações antigas
-            detailsReviewsContainer.innerHTML = '';
-
-            // Adiciona duas avaliações de exemplo (no futuro, viriam do banco de dados)
-            for (let i = 0; i < 2; i++) {
-                const reviewCard = document.createElement('article');
-                reviewCard.className = 'review-card';
-                reviewCard.innerHTML = `
-                    <div class="review-rating">★★★★☆</div>
-                    <h4 class="review-title">Ótima localização!</h4>
-                    <p class="review-body">Fácil de encontrar e com muitas vagas disponíveis quando fui.</p>
-                    <div class="reviewer-info">
-                        <img src="https://i.pravatar.cc/30?u=${i}" alt="Avatar">
-                        <span>Usuário ${i + 1}<br><small>Hoje</small></span>
-                    </div>
-                `;
-                detailsReviewsContainer.appendChild(reviewCard);
-            }
-
-            // Mostra a secção de detalhes
-            detailsSection.style.display = 'flex';
+        if (!estacionamentos || estacionamentos.length === 0) {
+            console.warn("AVISO: A lista de estacionamentos está vazia.");
+            return;
         }
+        
+        // A etapa de .map() não é mais necessária, pois os dados já estão no formato certo.
 
-        // --- 5. ADICIONA MARCADORES NO MAPA ---
+        // --- 3. ADICIONA MARCADORES NO MAPA ---
+        let markersAdded = 0;
         estacionamentos.forEach(est => {
             if (est.latitude && est.longitude) {
                 const marker = L.marker([est.latitude, est.longitude]).addTo(map);
                 marker.bindPopup(`<b>${est.nome}</b>`);
-                
-                // Adiciona o evento de clique para mostrar os detalhes
-                marker.on('click', () => {
-                    showDetails(est);
-                });
+                markersAdded++;
             }
         });
+        
+        console.log(`Processo concluído. ${markersAdded} marcadores foram adicionados ao mapa.`);
     });
     </script>
 {% endblock %}

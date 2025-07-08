@@ -1,5 +1,3 @@
-# Caminho: app/urls.py
-
 from django.urls import path
 from . import views
 
@@ -21,4 +19,7 @@ urlpatterns = [
     # Gestão de Conta
     path('conta/editar/', views.editar_usuario, name='editar_usuario'),
     path('conta/deletar/', views.deletar_usuario, name='deletar_usuario'),
+    
+    # NOVO URL PARA A API DE BUSCA DE BAIRROS
+    path('api/search-bairros/', views.search_bairros, name='search_bairros'),
 ]

@@ -1,8 +1,8 @@
 # Caminho: app/forms.py
 
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from .models import Avaliacao, Usuario, Estacionamento, HistoricoOcupacao
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from .models import Avaliacao, Usuario, Estacionamento, HistoricoOcupacao, Bairro
 
 # --- Formulário de Login ---
 class LoginForm(forms.Form):
@@ -37,40 +37,86 @@ class AvaliacaoForm(forms.ModelForm):
         }
 
 
-# --- Formulário de Registo de Utilizador ---
+# --- Formulário de Registo de Utilizador (ATUALIZADO PARA AUTOCOMPLETE) ---
 class UsuarioRegistrationForm(UserCreationForm):
     """
-    Formulário para registro de novos usuários, herdando os campos de senha do Django.
+    Formulário de registo com campo de bairro com autocompletar.
     """
+    # Campo visível para o utilizador digitar o nome do bairro
+    lugar_mora_nome = forms.CharField(
+        label='Bairro onde mora',
+        required=False,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Comece a digitar o nome do bairro...',
+            'autocomplete': 'off',
+            'class': 'bairro-autocomplete' # Classe para o JavaScript encontrar
+        })
+    )
+    # Campo escondido que guardará o ID do bairro selecionado
+    lugar_mora = forms.ModelChoiceField(
+        queryset=Bairro.objects.all(),
+        required=False,
+        widget=forms.HiddenInput()
+    )
+
+    class Meta(UserCreationForm.Meta):
+        model = Usuario
+        fields = UserCreationForm.Meta.fields + ('email', 'lugar_mora', 'vehicle_type')
+
+    def clean(self):
+        # Garante que se o nome do bairro for apagado, o ID também é limpo.
+        cleaned_data = super().clean()
+        if not cleaned_data.get('lugar_mora_nome'):
+            cleaned_data['lugar_mora'] = None
+        return cleaned_data
+
+
+# --- Formulário para EDITAR Utilizador (ATUALIZADO PARA AUTOCOMPLETE) ---
+class CustomUserChangeForm(UserChangeForm):
+    """
+    Formulário de edição de perfil com campo de bairro com autocompletar.
+    """
+    password = None # Remove o campo de senha da edição de perfil
+
+    lugar_mora_nome = forms.CharField(
+        label='Bairro onde mora',
+        required=False,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Comece a digitar o nome do bairro...',
+            'autocomplete': 'off',
+            'class': 'bairro-autocomplete'
+        })
+    )
+    lugar_mora = forms.ModelChoiceField(
+        queryset=Bairro.objects.all(),
+        required=False,
+        widget=forms.HiddenInput()
+    )
+
     class Meta:
         model = Usuario
-        # CORRIGIDO: UserCreationForm já inclui os campos de senha.
-        # Listamos apenas os campos do nosso modelo personalizado.
-        fields = [
-            'username',
-            'email',
-            'lugar_mora',
-            'vehicle_type',
-        ]
-        labels = {
-            'username': 'Nome de usuário',
-            'email': 'E-mail',
-            'lugar_mora': 'Local de residência',
-            'vehicle_type': 'Tipo de veículo',
-        }
-        widgets = {
-            'lugar_mora': forms.TextInput(attrs={'placeholder': 'Ex: Copacabana'}),
-        }
+        fields = ('username', 'email', 'lugar_mora', 'vehicle_type')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Preenche o campo de nome com o bairro atual do utilizador ao carregar a página
+        if self.instance and self.instance.lugar_mora:
+            self.fields['lugar_mora_nome'].initial = self.instance.lugar_mora.nome
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if not cleaned_data.get('lugar_mora_nome'):
+            cleaned_data['lugar_mora'] = None
+        return cleaned_data
 
 
 # --- Formulário de Registo de Estacionamento ---
 class EstacionamentoForm(forms.ModelForm):
     """
-    Formulário para registro ou edição de estacionamentos.
+    Formulário para registo ou edição de estacionamentos.
     """
     class Meta:
         model = Estacionamento
-        # Adicionei os campos de coordenadas para que possam ser preenchidos no formulário
         fields = [
             'nome', 'endereco', 'horario_abertura', 'horario_fechamento',
             'latitude', 'longitude', 'imagem_url',
@@ -95,7 +141,7 @@ class EstacionamentoForm(forms.ModelForm):
 # --- Formulário de Histórico de Ocupação ---
 class HistoricoOcupacaoForm(forms.ModelForm):
     """
-    Formulário para registrar a ocupação de um estacionamento em um dado momento.
+    Formulário para registar a ocupação de um estacionamento em um dado momento.
     """
     class Meta:
         model = HistoricoOcupacao
