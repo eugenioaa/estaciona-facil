@@ -1,0 +1,105 @@
+/* Estilos para a página de Avaliações */
+.container h1 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.caixa {
+    background-color: #FFFFFF;
+    border: 1px solid var(--cor-neutra-clara);
+    color: var(--cor-texto);
+    border-radius: 10px;
+    padding: 25px;
+    width: 90%;
+    max-width: 900px;
+    margin: 25px auto;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* Seção de seleção de estacionamento */
+.selecionar-estacionamento select {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 5px;
+    border: 1px solid var(--cor-neutra-media);
+    background-color: #FFFFFF; /* <<< CORRIGIDO PARA BRANCO */
+    color: var(--cor-texto);
+}
+
+/* Informações do estacionamento */
+.estacionamento-info {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.estacionamento-info .estacionamento-img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.estacionamento-info h2 {
+    margin-top: 0;
+}
+
+/* Seção de avaliações */
+.avaliacoes p, .avaliacoes .avaliacao {
+    line-height: 1.6;
+}
+
+.estrelas {
+    color: var(--cor-primaria);
+    font-size: 1.3em;
+    vertical-align: middle;
+}
+
+.avaliacao {
+    border-bottom: 1px solid var(--cor-neutra-clara);
+    margin-bottom: 1em;
+    padding-bottom: 1em;
+}
+
+.avaliacao:last-child {
+    border-bottom: none;
+}
+
+/* Formulário de avaliação */
+.formulario form p {
+    margin-bottom: 15px;
+}
+
+.formulario label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.formulario input, .formulario textarea {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    border: 1px solid var(--cor-neutra-media);
+    border-radius: 5px;
+    background-color: #FFFFFF; /* Garante que os inputs sejam brancos */
+}
+
+.formulario button.btn {
+    display: inline-block;
+    padding: 12px 25px;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: none;
+    background-color: var(--cor-primaria);
+    color: #1C1C1C;
+    cursor: pointer;
+    font-weight: bold;
+    transition: filter 0.2s;
+    margin-top: 10px;
+}
+
+.formulario button.btn:hover {
+    filter: brightness(0.9);
+}

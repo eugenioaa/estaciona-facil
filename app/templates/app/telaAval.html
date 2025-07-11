@@ -1,0 +1,88 @@
+{% extends 'app/base.html' %}
+{% load static %}
+
+{% block title %}Avaliações - EstacionaFácil{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{% static 'telaAval.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Sistema de Avaliações de Estacionamentos</h1>
+
+    <section class="selecionar-estacionamento caixa">
+        <form method="get">
+            <label for="estac_id">Escolha o estacionamento:</label>
+            <select name="estac_id" id="estac_id" onchange="this.form.submit()">
+                <option value="">-- Selecione --</option>
+                {% for est in estacionamentos %}
+                    <option value="{{ est.id }}" {% if estacionamento and est.id == estacionamento.id %}selected{% endif %}>
+                        {{ est.nome }}
+                    </option>
+                {% endfor %}
+            </select>
+        </form>
+    </section>
+
+    {% if not estacionamento %}
+        <div class="caixa" style="text-align: center;">
+            <p>Selecione um estacionamento acima para ver detalhes e avaliações.</p>
+        </div>
+    {% else %}
+        <section class="estacionamento-info caixa">
+            {% if estacionamento.imagem_url %}
+                <img src="{{ estacionamento.imagem_url }}" alt="Foto de {{ estacionamento.nome }}" class="estacionamento-img">
+            {% else %}
+                <div class="image-placeholder"><i class="fa-regular fa-image"></i></div>
+            {% endif %}
+            <div>
+                <h2>{{ estacionamento.nome }}</h2>
+                <p><strong>Endereço:</strong> {{ estacionamento.endereco }}</p>
+                <p><strong>Disponibilidade:</strong> {{ estacionamento.get_disponibilidade_display }}</p>
+                <p><strong>Horário:</strong> {{ estacionamento.horario_abertura|time:"H:i" }} às {{ estacionamento.horario_fechamento|time:"H:i" }}</p>
+            </div>
+        </section>
+
+        <section class="avaliacoes caixa">
+            <h3>Avaliação Média</h3>
+            <p>Segurança: <span class="estrelas">{{ media_seguranca }}</span></p>
+            <p>Praticidade: <span class="estrelas">{{ media_praticidade }}</span></p>
+            <p>Preço: <span class="estrelas">{{ media_preco }}</span></p>
+            <p>Disponibilidade: <span class="estrelas">{{ media_disponibilidade }}</span></p>
+        </section>
+
+        <section class="avaliacoes caixa">
+            <h3>Avaliações dos Utilizadores</h3>
+            {% for avaliacao in avaliacoes %}
+                <div class="avaliacao">
+                    <p>
+                        <strong>{{ avaliacao.usuario.username|default:"Anónimo" }}</strong> —
+                        <span class="estrelas">
+                        {% with media=avaliacao.media_avaliacao %}
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= media|add:0 %}★{% else %}☆{% endif %}
+                            {% endfor %}
+                        {% endwith %}
+                        </span>
+                        <br>
+                        <em>{{ avaliacao.comentario }}</em>
+                    </p>
+                </div>
+            {% empty %}
+                <p>Nenhuma avaliação ainda. Seja o primeiro a avaliar!</p>
+            {% endfor %}
+        </section>
+
+        <section class="formulario caixa">
+            <h3>Deixe a sua Avaliação</h3>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="estacionamento_id" value="{{ estacionamento.id }}">
+                {{ avaliacao_form.as_p }}
+                <button type="submit" class="btn">Enviar Avaliação</button>
+            </form>
+        </section>
+    {% endif %}
+</div>
+{% endblock %}

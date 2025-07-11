@@ -1,0 +1,218 @@
+{% extends 'app/base.html' %}
+{% load static %}
+
+{% block title %}Simulador de Demanda{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{% static 'simulador.css' %}" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div id="django-data" data-estacionamento-id="{{ estacionamento_principal.id }}" style="display: none;"></div>
+<div class="container">
+<section class="grid-controls">
+<!-- GRUPO ESQUERDA: Contém os filtros -->
+<div class="filtros-container">
+<select id="filtro-ordem" class="control-button">
+<option value="padrao">Padrão</option>
+<option value="mais-baratos">Mais baratos</option>
+</select>
+<button id="btn-filtro-cheio" class="control-button">Ocultar Cheios</button>
+</div>
+<div id="time-selector-container" class="control-button">
+    <label for="hora">Previsão para:</label>
+    <input type="time" id="hora" name="hora" />
+</div>
+</section>
+
+    <section id="estacionamentos-grid" class="estacionamentos-grid">
+        {% for est in todos_estacionamentos %}
+        <a href="{% url 'app:simulador_demanda' est.id %}" class="card-link" data-id="{{ est.id }}" data-preco="{{ est.preco_por_hora }}">
+            <div class="card {% if est.id == estacionamento_principal.id %}destaque{% endif %}">
+                <img src="{{ est.imagem_url|default:'/static/app/EstacionaFacilLogo.jpeg' }}" alt="{{ est.nome }}">
+                <div class="info">
+                    <h3>{{ est.nome }}</h3>
+                    <p>{{ est.endereco }}</p>
+                </div>
+                <div class="mini-barra-ocupacao">
+                    <div class="mini-barra-preenchida" id="barra-card-{{ est.id }}"></div>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </section>
+
+    <section class="detalhes-container">
+        <div class="detalhes-imagem">
+            <img src="{{ estacionamento_principal.imagem_url|default:'/static/app/EstacionaFacilLogo.jpeg' }}" alt="{{ estacionamento_principal.nome }}">
+        </div>
+        <div class="detalhes-info">
+            <h1>{{ estacionamento_principal.nome }}</h1>
+            <p>{{ estacionamento_principal.endereco }}</p>
+            <div class="barra-container">
+                <div class="barra-ocupacao">
+                    <div id="barra-preenchida-principal" class="barra-preenchida"></div>
+                </div>
+                <div id="barra-texto-principal" class="barra-texto">0% das vagas estão ocupadas</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="grafico-container">
+        <h2>Ocupação Prevista Durante o Dia</h2>
+        <canvas id="ocupacaoChart"></canvas>
+    </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+try {
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // ======================================================================
+        // PARTE 1: SELEÇÃO DE TODOS OS ELEMENTOS DA PÁGINA
+        // ======================================================================
+        const funcoesDeCalculo = {
+            1: calcularOcupacaoShoppingGavea, 2: calcularOcupacaoPUC, 3: calcularOcupacaoShoppingLeblon,
+            4: calcularOcupacaoZonaSul, 5: calcularOcupacaoParquePatins, 6: calcularOcupacaoPaoAcucar,
+            7: calcularOcupacaoGaveaTrade, 8: (h) => 15, 9: (h) => 35, 10: calcularOcupacaoEstapar,
+        };
+
+        const djangoDataElement = document.getElementById('django-data');
+        const estacionamentoPrincipalId = parseInt(djangoDataElement.dataset.estacionamentoId, 10);
+        const inputHora = document.getElementById('hora');
+        const barraPrincipal = document.getElementById('barra-preenchida-principal');
+        const textoBarraPrincipal = document.getElementById('barra-texto-principal');
+        const btnFiltroCheio = document.getElementById('btn-filtro-cheio');
+        const gridContainer = document.getElementById('estacionamentos-grid');
+        const canvasGrafico = document.getElementById('ocupacaoChart');
+
+        // ======================================================================
+        // PARTE 2: TODAS AS FUNÇÕES DE CÁLCULO DE OCUPAÇÃO
+        // ======================================================================
+        function calcularOcupacaoPUC(h) { if (h<7) return 5; if (h<8.5) return 5+((h-7)/1.5)*80; if (h<12) return 85+5*Math.sin((h-8.5)*Math.PI*2/3.5); if (h<13) return 85-((h-12)/1)*65; if (h<15) return 50+10*Math.sin((h-13)*Math.PI); if (h<17) return 50-((h-15)/2)*40; return 5; }
+        function calcularOcupacaoShoppingGavea(h) { if (h>=10&&h<=18) return 20+((h-10)/8)*60; return 20; }
+        function calcularOcupacaoShoppingLeblon(h) { if (h>=12&&h<=14) return 25+((h-12)/2)*60; if (h>14&&h<=16) return 85-((h-14)/2)*60; return 25; }
+        function calcularOcupacaoZonaSul(h) { if (h>=11&&h<=14) return 30+((h-11)/3)*50; return 30; }
+        function calcularOcupacaoParquePatins(h) { return 10; }
+        function calcularOcupacaoPaoAcucar(h) { if (h>=10&&h<=14) return 25+((h-10)/4)*60; return 25; }
+        function calcularOcupacaoGaveaTrade(h) { if (h>=9&&h<=12) return 25+((h-9)/3)*55; if (h>=14&&h<=17) return 25+((h-14)/3)*55; return 25; }
+        function calcularOcupacaoEstapar(h) { if (h>=9&&h<=12) return 30+((h-9)/3)*55; if (h>=14&&h<=17) return 30+((h-14)/3)*55; return 30; }
+
+        // ======================================================================
+        // PARTE 3: FUNÇÕES QUE ATUALIZAM A INTERFACE GRÁFICA
+        // ======================================================================
+        function horaStringParaDecimal(horaStr) {
+            if (!horaStr) { const agora = new Date(); return agora.getHours() + agora.getMinutes() / 60; }
+            const [h, m] = horaStr.split(':').map(Number); return h + m / 60;
+        }
+
+        function atualizarLinksDosCards(horaString) {
+            if (!horaString) return;
+            document.querySelectorAll('.card-link').forEach(link => {
+                const url = new URL(link.href);
+                url.searchParams.set('time', horaString);
+                link.href = url.toString();
+            });
+        }
+
+        function atualizarBarraPrincipal(horaDecimal) {
+            const func = funcoesDeCalculo[estacionamentoPrincipalId] || ((h) => 30);
+            let ocupacao = Math.round(func(horaDecimal));
+            barraPrincipal.style.width = ocupacao + '%';
+            textoBarraPrincipal.textContent = `${ocupacao}% das vagas estão ocupadas`;
+            barraPrincipal.classList.remove('vermelha');
+            if (ocupacao >= 80) barraPrincipal.classList.add('vermelha');
+        }
+
+        function atualizarTodasAsMiniBarras(horaDecimal) {
+            document.querySelectorAll('.mini-barra-preenchida').forEach(barra => {
+                const id = parseInt(barra.id.split('-').pop(), 10);
+                const func = funcoesDeCalculo[id] || ((h) => 30);
+                const ocupacao = Math.round(func(horaDecimal));
+                barra.style.width = ocupacao + '%';
+                barra.classList.remove('vermelha');
+                if (ocupacao >= 80) barra.classList.add('vermelha');
+                const card = barra.closest('.card');
+                card.classList.remove('borda-vermelha', 'borda-azul');
+                if (ocupacao >= 80) card.classList.add('borda-vermelha');
+                else if (card.classList.contains('destaque')) card.classList.add('borda-azul');
+            });
+        }
+
+        function aplicarFiltroCheio(horaDecimal) {
+            const filtroAtivo = btnFiltroCheio.classList.contains('ativo');
+            document.querySelectorAll('.card-link').forEach(link => {
+                const id = parseInt(link.dataset.id, 10);
+                const func = funcoesDeCalculo[id] || ((h) => 30);
+                const ocupacao = Math.round(func(horaDecimal));
+                if (filtroAtivo && ocupacao >= 80) link.classList.add('escondido');
+                else link.classList.remove('escondido');
+            });
+        }
+
+        // ======================================================================
+        // PARTE 4: INICIALIZAÇÃO DO GRÁFICO
+        // ======================================================================
+        const calcularOcupacaoGrafico = funcoesDeCalculo[estacionamentoPrincipalId] || ((h) => 30);
+        const ctx = canvasGrafico.getContext('2d');
+        const ocupacaoChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: Array.from({length: 24}, (_, i) => `${i}:00`),
+                datasets: [{
+                    label: 'Ocupação Prevista (%)',
+                    data: Array.from({length: 24}, (_, h) => Math.round(calcularOcupacaoGrafico(h))),
+                    borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.2)', fill: true, tension: 0.3
+                }]
+            },
+            options: { responsive: true, scales: { y: { min: 0, max: 100 }, x: { title: { display: true, text: 'Hora do dia' } } } }
+        });
+
+        // ======================================================================
+        // PARTE 5: LÓGICA CENTRAL - EVENTOS E INICIALIZAÇÃO
+        // ======================================================================
+        function atualizarTudo(horaDecimal) {
+            atualizarBarraPrincipal(horaDecimal);
+            atualizarTodasAsMiniBarras(horaDecimal);
+            aplicarFiltroCheio(horaDecimal);
+        }
+
+        inputHora.addEventListener('input', (e) => {
+            const horaString = e.target.value;
+            const horaDecimal = horaStringParaDecimal(horaString);
+            atualizarTudo(horaDecimal);
+            atualizarLinksDosCards(horaString);
+        });
+
+        btnFiltroCheio.addEventListener('click', () => {
+            btnFiltroCheio.classList.toggle('ativo');
+            const horaDecimal = horaStringParaDecimal(inputHora.value);
+            aplicarFiltroCheio(horaDecimal);
+        });
+
+        function inicializarPagina() {
+            let horaInicialString = inputHora.value;
+            if (!horaInicialString) {
+                const agora = new Date();
+                const horas = String(agora.getHours()).padStart(2, '0');
+                const minutos = String(agora.getMinutes()).padStart(2, '0');
+                horaInicialString = `${horas}:${minutos}`;
+                inputHora.value = horaInicialString;
+            }
+            const horaDecimalInicial = horaStringParaDecimal(horaInicialString);
+            atualizarTudo(horaDecimalInicial);
+            atualizarLinksDosCards(horaInicialString);
+        }
+
+        inicializarPagina();
+
+    });
+} catch (e) {
+    console.error("Ocorreu um erro CRÍTICO no script do simulador:", e);
+}
+</script>
+{% endblock %}

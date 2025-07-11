@@ -1,0 +1,233 @@
+/* static/simulador.css (VERSÃO COMPLETA E ATUALIZADA) */
+
+
+
+/* --- Barra de Controles Superior --- */
+.grid-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* Container para o grupo de filtros à esquerda */
+.grid-controls .filtros-container {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Espaço entre o select e o botão */
+}
+
+/* 
+   ==========================================================================
+   ESTILO PROFISSIONAL PARA TODOS OS CONTROLES
+   ==========================================================================
+*/
+
+/* 1. Estilo base do "Botão" - aplicado a <button>, <select> e ao <div> da hora */
+.control-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px; /* Espaço interno, ex: entre "Previsão para:" e a hora */
+    padding: 8px 18px;
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 6px;
+    background-color: #FFFFFF; /* Fundo branco */
+    color: var(--cor-texto);
+    border: 1px solid #BDBDBD;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    white-space: nowrap;
+}
+
+.control-button:hover {
+    border-color: #888888;
+    background-color: #f7f7f7; /* Leve escurecida ao passar o mouse */
+}
+
+/* 2. Estilo do botão "Ocultar Cheios" quando ATIVO */
+#btn-filtro-cheio.ativo {
+    background-color: var(--cor-primaria); /* Fundo amarelo */
+    color: var(--cor-texto);
+    border-color: var(--cor-primaria);
+}
+
+/* 3. Estilização do <select> para parecer um botão */
+select.control-button {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    padding-right: 35px; /* Espaço para a seta */
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    background-size: 1.2em 1.2em;
+}
+
+/* 4. Estilização do seletor de HORA para se integrar ao seu "falso botão" */
+#time-selector-container label {
+    font-weight: inherit; /* Herda o estilo do texto do contêiner */
+    color: inherit;
+    cursor: pointer;
+}
+
+#time-selector-container input[type="time"] {
+    background: transparent;
+    border: none;
+    color: inherit;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    padding: 0;
+    margin: 0;
+    /* Remove a borda de foco padrão para uma melhor integração */
+    outline: none; 
+}
+
+/* Estiliza o ícone de relógio no Chrome/Edge */
+#time-selector-container input[type="time"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    background-color: transparent;
+}
+
+
+/* --- Grade e Cards --- */
+.estacionamentos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    align-items: start;
+}
+.card-link {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+}
+.card-link.escondido {
+    display: none;
+}
+.card {
+    background-color: var(--cor-fundo-caixa);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border: 3px solid transparent;
+    width: 100%;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+}
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+.card.destaque, .card.borda-azul {
+    border-color: var(--cor-destaque);
+}
+.card.borda-vermelha {
+    border-color: #ef4444;
+}
+.card img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+.card .info {
+    padding: 15px;
+    flex-grow: 1;
+}
+.card h3 {
+    margin: 0 0 5px 0;
+    font-size: 1.1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.card p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--cor-neutra-media);
+}
+
+/* --- Mini-Barras de Ocupação --- */
+.mini-barra-ocupacao {
+    height: 8px;
+    background-color: #e5e7eb; /* Cinza claro */
+    margin: 0 15px 15px 15px;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.mini-barra-preenchida {
+    height: 100%;
+    width: 0%; 
+    background-color: #3b82f6; /* Cor Padrão: Azul */
+    transition: width 0.5s ease, background-color 0.5s ease;
+}
+
+.mini-barra-preenchida.vermelha {
+    background-color: #ef4444; /* Cor para ocupação alta */
+}
+
+/* --- Seção de Detalhes do Estacionamento Principal --- */
+.detalhes-container { 
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: 30px; 
+    align-items: center; 
+    margin-top: 30px; 
+    background-color: var(--cor-fundo-caixa); 
+    padding: 20px; 
+    border-radius: 10px; 
+}
+.detalhes-imagem img { 
+    width: 400px; 
+    height: 250px; 
+    border-radius: 10px; 
+    object-fit: cover; 
+    max-width: 100%; 
+}
+.detalhes-info { 
+    flex: 1; 
+    min-width: 300px; 
+}
+.detalhes-info h1 { 
+    margin-top: 0; 
+}
+.barra-container { 
+    margin-top: 20px; 
+}
+.barra-ocupacao { 
+    background-color: #e5e7eb; 
+    border-radius: 10px; 
+    height: 20px; 
+    width: 100%; 
+    overflow: hidden; 
+}
+.barra-preenchida { 
+    background-color: #3b82f6; 
+    height: 100%; 
+    width: 0%; 
+    border-radius: 10px; 
+    transition: width 0.5s ease; 
+}
+.barra-preenchida.vermelha { 
+    background-color: #ef4444; 
+}
+.barra-texto { 
+    font-size: 1rem; 
+    text-align: center; 
+    margin-top: 10px; 
+    font-weight: 600; 
+}
+.grafico-container { 
+    margin-top: 30px; 
+    padding: 20px; 
+    background-color: var(--cor-fundo-caixa); 
+    border-radius: 10px; 
+}
+.grafico-container h2 { 
+    text-align: center; 
+    margin-top: 0; 
+}

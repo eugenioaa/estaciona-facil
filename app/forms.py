@@ -1,16 +1,26 @@
+# Caminho: app/forms.py
+
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from .models import Avaliacao, Usuario, Estacionamento
-# app/forms.py
-from .models import Avaliacao, Usuario, Estacionamento, HistoricoOcupacao
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from .models import Avaliacao, Usuario, Estacionamento, HistoricoOcupacao, Bairro
+
+# --- Formulário de Login ---
+class LoginForm(forms.Form):
+    """
+    Formulário para autenticação de usuários existentes.
+    """
+    username = forms.CharField(label='Usuário', max_length=150)
+    password = forms.CharField(label='Senha', widget=forms.PasswordInput)
+
+
+# --- Formulário de Avaliação ---
 class AvaliacaoForm(forms.ModelForm):
     """
     Formulário para submissão de avaliações de estacionamentos.
-    Os campos 'usuario' e 'estacionamento' são preenchidos na view.
     """
     class Meta:
         model = Avaliacao
-        exclude = ['usuario', 'estacionamento']  # Importante para não exibir no formulário
+        exclude = ['usuario', 'estacionamento']
         labels = {
             'nota_seguranca': 'Nota - Segurança (1 a 5)',
             'nota_praticidade': 'Nota - Praticidade (1 a 5)',
@@ -27,78 +37,115 @@ class AvaliacaoForm(forms.ModelForm):
         }
 
 
+# --- Formulário de Registo de Utilizador (ATUALIZADO PARA AUTOCOMPLETE) ---
 class UsuarioRegistrationForm(UserCreationForm):
     """
-    Formulário para registro de novos usuários.
+    Formulário de registo com campo de bairro com autocompletar.
     """
+    # Campo visível para o utilizador digitar o nome do bairro
+    lugar_mora_nome = forms.CharField(
+        label='Bairro onde mora',
+        required=False,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Comece a digitar o nome do bairro...',
+            'autocomplete': 'off',
+            'class': 'bairro-autocomplete' # Classe para o JavaScript encontrar
+        })
+    )
+    # Campo escondido que guardará o ID do bairro selecionado
+    lugar_mora = forms.ModelChoiceField(
+        queryset=Bairro.objects.all(),
+        required=False,
+        widget=forms.HiddenInput()
+    )
+
+    class Meta(UserCreationForm.Meta):
+        model = Usuario
+        fields = UserCreationForm.Meta.fields + ('email', 'lugar_mora', 'vehicle_type')
+
+    def clean(self):
+        # Garante que se o nome do bairro for apagado, o ID também é limpo.
+        cleaned_data = super().clean()
+        if not cleaned_data.get('lugar_mora_nome'):
+            cleaned_data['lugar_mora'] = None
+        return cleaned_data
+
+
+# --- Formulário para EDITAR Utilizador (ATUALIZADO PARA AUTOCOMPLETE) ---
+class CustomUserChangeForm(UserChangeForm):
+    """
+    Formulário de edição de perfil com campo de bairro com autocompletar.
+    """
+    password = None # Remove o campo de senha da edição de perfil
+
+    lugar_mora_nome = forms.CharField(
+        label='Bairro onde mora',
+        required=False,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Comece a digitar o nome do bairro...',
+            'autocomplete': 'off',
+            'class': 'bairro-autocomplete'
+        })
+    )
+    lugar_mora = forms.ModelChoiceField(
+        queryset=Bairro.objects.all(),
+        required=False,
+        widget=forms.HiddenInput()
+    )
+
     class Meta:
         model = Usuario
-        fields = [
-            'username',
-            'email',
-            'lugar_mora',
-            'vehicle_type',
-            'password1',
-            'password2',
-        ]
-        labels = {
-            'username': 'Nome de usuário',
-            'email': 'E-mail',
-            'lugar_mora': 'Local de residência',
-            'vehicle_type': 'Tipo de veículo',
-        }
-        help_texts = {
-            'password1': 'Digite uma senha forte.',
-            'password2': 'Repita a senha para confirmação.',
-        }
-        widgets = {
-            'lugar_mora': forms.TextInput(attrs={'placeholder': 'Ex: Copacabana'}),
-        }
+        fields = ('username', 'email', 'lugar_mora', 'vehicle_type')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Preenche o campo de nome com o bairro atual do utilizador ao carregar a página
+        if self.instance and self.instance.lugar_mora:
+            self.fields['lugar_mora_nome'].initial = self.instance.lugar_mora.nome
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if not cleaned_data.get('lugar_mora_nome'):
+            cleaned_data['lugar_mora'] = None
+        return cleaned_data
 
 
+# --- Formulário de Registo de Estacionamento ---
 class EstacionamentoForm(forms.ModelForm):
     """
-    Formulário para registro ou edição de estacionamentos.
+    Formulário para registo ou edição de estacionamentos.
     """
     class Meta:
         model = Estacionamento
         fields = [
-            'nome',
-            'endereco',
-            'disponibilidade',
-            'horario_abertura',
-            'horario_fechamento',
-            'imagem_url',
+            'nome', 'endereco', 'horario_abertura', 'horario_fechamento',
+            'latitude', 'longitude', 'imagem_url',
         ]
         labels = {
             'nome': 'Nome do Estacionamento',
             'endereco': 'Endereço',
-            'disponibilidade': 'Disponibilidade',
             'horario_abertura': 'Horário de Abertura',
             'horario_fechamento': 'Horário de Fechamento',
+            'latitude': 'Latitude',
+            'longitude': 'Longitude',
             'imagem_url': 'URL da Imagem (opcional)',
-        }
-        help_texts = {
-            'imagem_url': 'Insira um link direto para a imagem (opcional).',
         }
         widgets = {
             'horario_abertura': forms.TimeInput(attrs={'type': 'time'}),
             'horario_fechamento': forms.TimeInput(attrs={'type': 'time'}),
+            'latitude': forms.NumberInput(attrs={'placeholder': 'Ex: -22.9068'}),
+            'longitude': forms.NumberInput(attrs={'placeholder': 'Ex: -43.1729'}),
         }
 
-# app/forms.py
 
+# --- Formulário de Histórico de Ocupação ---
 class HistoricoOcupacaoForm(forms.ModelForm):
     """
-    Formulário para registrar a ocupação de um estacionamento em um dado momento.
+    Formulário para registar a ocupação de um estacionamento em um dado momento.
     """
     class Meta:
         model = HistoricoOcupacao
-        # Mostramos apenas o campo que o usuário precisa preencher.
-        # O 'estacionamento' seria definido na view (ex: pela URL da página)
-        # e o 'timestamp' é preenchido automaticamente.
         fields = ['vagas_ocupadas']
-        
         labels = {
             'vagas_ocupadas': 'Número de Vagas Ocupadas Agora',
         }

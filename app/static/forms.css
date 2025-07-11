@@ -1,0 +1,125 @@
+/* ==========================================================================
+   ESTILOS UNIFICADOS PARA FORMULÁRIOS (FORMS.CSS)
+   ========================================================================== */
+
+/* Container específico para formulários */
+.form-container {
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: var(--cor-fundo-caixa, #FFFFFF);
+    border: 1px solid var(--cor-neutra-clara, #E0E0E0);
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.form-container h1 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 25px;
+}
+
+.form-container p {
+    text-align: center;
+    color: var(--cor-neutra-media, #888888);
+    line-height: 1.5;
+}
+
+.field {
+    margin-bottom: 20px;
+}
+
+.field label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.field input,
+.field select,
+.field textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--cor-neutra-media, #888888);
+    border-radius: 5px;
+    background-color: #FFFFFF;
+    color: var(--cor-texto, #1C1C1C);
+    font-size: 1rem;
+}
+
+.field .errorlist {
+    color: #e74c3c;
+    list-style: none;
+    padding: 5px 0 0 0;
+    margin: 0;
+    font-size: 0.9em;
+    font-weight: bold;
+}
+
+/* ESTILO DO BOTÃO CORRIGIDO */
+.btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #1C1C1C; /* Texto preto */
+    background-color: var(--cor-primaria, #FFD700); /* Fundo amarelo */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transition: filter 0.2s;
+}
+
+.btn:hover {
+    filter: brightness(0.9);
+}
+
+.login-link {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.login-link a {
+    color: var(--cor-destaque, #0D6EFD);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* Estilos para o Autocomplete */
+.autocomplete-container {
+    position: relative;
+}
+
+.suggestions-list {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: #FFFFFF;
+    border: 1px solid var(--cor-neutra-media);
+    border-top: none;
+    border-radius: 0 0 5px 5px;
+    z-index: 1000;
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.suggestions-list.visible {
+    display: block;
+}
+
+.suggestions-list li {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.suggestions-list li:hover, .suggestions-list li.selected {
+    background-color: var(--cor-neutra-clara);
+}

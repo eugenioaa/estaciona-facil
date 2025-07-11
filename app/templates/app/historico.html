@@ -1,0 +1,38 @@
+{% extends 'app/base.html' %}
+{% load static %}
+
+{% block title %}Histórico de Ocupação - EstacionaFácil{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{% static 'historico.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="table-container">
+        <h1>Histórico de Ocupação</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Estacionamento</th>
+                    <th>Vagas Ocupadas</th>
+                    <th>Data e Hora</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in historico_list %}
+                    <tr>
+                        <td>{{ item.estacionamento.nome }}</td>
+                        <td>{{ item.vagas_ocupadas }}</td>
+                        <td>{{ item.timestamp|date:"d/m/Y H:i" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="3" style="text-align: center;">Nenhum registo de histórico encontrado.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

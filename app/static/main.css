@@ -1,45 +1,121 @@
+/* static/main.css */
+
+/* ==========================================================================
+   FICHEIRO DE ESTILOS PRINCIPAL (MAIN.CSS)
+   ========================================================================== */
+
+/* --- 1. Reset e Configuração da Paleta de Cores --- */
+html {
+  box-sizing: border-box;
+}
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+:root {
+    --cor-primaria: #FFD700;
+    --cor-destaque: #0D6EFD;
+    --cor-fundo: #a3a2a2;
+    --cor-texto: #1C1C1C;
+    --cor-fundo-caixa: #FFFFFF;
+    --cor-neutra-clara: #E9ECEF;
+    --cor-neutra-media: #888888;
+    --cor-botao-inativo-fundo: #666666;
+    --cor-botao-inativo-hover: #555555;
+}
+
+/* --- 2. Estilos Gerais --- */
 body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto);
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-      "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-      sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-  
-  code {
-    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-      monospace;
-  }
-  
-  .App {
-    text-align: center;
-  }
-  
-  .App-logo {
-    height: 40vmin;
-    pointer-events: none;
-  }
-  
-  .App-header {
-    background-color: #282c34;
-    min-height: 100vh;
+}
+
+/* --- 3. Cabeçalho e Navegação --- */
+.cabecalho {
+    background-color: var(--cor-fundo-caixa);
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
+    padding: 10px 30px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid var(--cor-neutra-clara);
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+}
+
+img.logo {
+    height: 50px;
+}
+
+.menu {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.menu .button-link {
+    padding: 8px 18px;
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    background-color: var(--cor-botao-inativo-fundo);
     color: white;
-  }
-  
-  .App-link {
-    color: #61dafb;
-  }
-  
-  .heart {
-    color: #ff0000;
-  }
-  
-  .small {
-    font-size: 0.75rem;
-  }
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.2s;
+}
+
+.menu .button-link:hover {
+    background-color: var(--cor-botao-inativo-hover);
+}
+
+.menu .button-link.ativo {
+    background-color: var(--cor-primaria);
+    color: var(--cor-texto);
+    font-weight: bold;
+}
+
+/* --- 4. Container e Caixa de Conteúdo Padrão --- */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.caixa {
+    background-color: var(--cor-fundo-caixa);
+    border: 1px solid var(--cor-neutra-clara);
+    color: var(--cor-texto);
+    border-radius: 10px;
+    padding: 25px;
+    margin: 25px auto;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* ===== NOVA REGRA DE ESTILO PARA BOTÕES GLOBAIS ===== */
+.btn-global {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 18px;
+    margin: 10px;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--cor-primaria);
+    color: #1C1C1C;
+    cursor: pointer;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    transition: filter 0.2s;
+}
+
+.btn-global:hover {
+    filter: brightness(0.9);
+}

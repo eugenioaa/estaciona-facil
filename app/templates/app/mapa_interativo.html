@@ -1,0 +1,196 @@
+{% extends 'app/base.html' %}
+{% load static %}
+
+{% block title %}Mapa Interativo - EstacionaFácil{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{% static 'mapa_interativo.css' %}" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <section class="filter-section">
+        <div class="filter-controls">
+        </div>
+        <div class="search-box">
+            <div class="search-container">
+                <input type="text" id="search-estacionamento" placeholder="Buscar estacionamento...">
+                <ul id="search-suggestions" class="suggestions-list"></ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="map-container">
+        <div id="map"></div>
+    </section>
+
+    <section id="info-review-container" class="info-review-container hidden">
+        <div id="info-box" class="info-box">
+            <img id="info-box-img" src="" alt="Imagem do Estacionamento" class="info-box-img">
+            <div class="info-box-details">
+                <h3 id="info-box-nome">Nome do Estacionamento</h3>
+                <p id="info-box-endereco">Endereço completo</p>
+                <p id="info-box-horario"><strong>Horário:</strong> 08:00 - 22:00</p>
+                <p id="info-box-preco"></p> </div>
+        </div>
+
+        <div id="review-box" class="review-box">
+            <h3 class="review-title">Última Avaliação</h3>
+            <p class="estrelas" id="review-box-estrelas"></p>
+            <p class="review-body" id="review-box-comentario"></p>
+            <div class="review-footer">
+                <strong id="review-box-usuario"></strong>
+                <span id="review-box-data"></span>
+            </div>
+        </div>
+        
+        <div id="no-review-box" class="review-box hidden">
+             <h3>Nenhuma avaliação encontrada</h3>
+             <p>Este estacionamento ainda não possui avaliações com comentários.</p>
+             <a id="no-review-link" href="#" class="btn-avaliar">Seja o primeiro a avaliar!</a>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    {{ estacionamentos_list|json_script:"estacionamentos-data" }}
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // --- Referências aos elementos do DOM ---
+        const infoReviewContainer = document.getElementById('info-review-container');
+        const infoBoxImg = document.getElementById('info-box-img');
+        const infoBoxNome = document.getElementById('info-box-nome');
+        const infoBoxEndereco = document.getElementById('info-box-endereco');
+        const infoBoxHorario = document.getElementById('info-box-horario');
+        const infoBoxPreco = document.getElementById('info-box-preco');
+
+        const reviewBox = document.getElementById('review-box');
+        const reviewBoxEstrelas = document.getElementById('review-box-estrelas');
+        const reviewBoxComentario = document.getElementById('review-box-comentario');
+        const reviewBoxUsuario = document.getElementById('review-box-usuario');
+        const reviewBoxData = document.getElementById('review-box-data');
+        
+        const noReviewBox = document.getElementById('no-review-box');
+        const noReviewLink = document.getElementById('no-review-link');
+
+        // --- Configuração do Mapa ---
+        const PUC_COORDS = { lat: -22.9768, lng: -43.2330 };
+        let map = L.map('map').setView([PUC_COORDS.lat, PUC_COORDS.lng], 15);
+        let markersLayer = L.layerGroup().addTo(map);
+        let allMarkers = {};
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        const dataElement = document.getElementById('estacionamentos-data');
+        const allEstacionamentos = JSON.parse(dataElement.textContent);
+        
+        // --- Funções Auxiliares ---
+        function generateStars(media) {
+            if (media === null || media === undefined) return "☆☆☆☆☆";
+            const arredondado = Math.round(media);
+            return "★".repeat(arredondado) + "☆".repeat(5 - arredondado);
+        }
+
+        function updateInfoPanel(estacionamentoId) {
+            const est = allEstacionamentos.find(e => e.id === estacionamentoId);
+            if (!est) return;
+
+            infoReviewContainer.classList.remove('hidden');
+
+            infoBoxImg.src = est.imagem_url || "{% static 'app/EstacionaFacilLogo.jpeg' %}";
+            infoBoxNome.textContent = est.nome;
+            infoBoxEndereco.textContent = est.endereco;
+            infoBoxHorario.innerHTML = `<strong>Horário:</strong> ${est.horario_abertura} - ${est.horario_fechamento}`;
+            
+            // CORREÇÃO AQUI: Usando .innerHTML para renderizar a tag <strong>
+            if (est.preco_por_hora !== null) {
+                infoBoxPreco.innerHTML = `<strong>Preço:</strong> R$ ${est.preco_por_hora.toFixed(2).replace('.',',')} / hora`;
+                infoBoxPreco.classList.remove('hidden');
+            } else {
+                infoBoxPreco.classList.add('hidden');
+            }
+
+            if (est.latest_review) {
+                reviewBox.classList.remove('hidden');
+                noReviewBox.classList.add('hidden');
+
+                reviewBoxEstrelas.textContent = generateStars(est.latest_review.media_avaliacao);
+                reviewBoxComentario.textContent = est.latest_review.comentario;
+                reviewBoxUsuario.textContent = est.latest_review.usuario;
+                reviewBoxData.textContent = est.latest_review.data_avaliacao;
+            } else {
+                reviewBox.classList.add('hidden');
+                noReviewBox.classList.remove('hidden');
+                noReviewLink.href = `{% url 'app:tela_avaliacoes' %}?estac_id=${est.id}`;
+            }
+        }
+
+        // --- Lógica Principal de Criação de Marcadores ---
+        function updateMap(estacionamentos) {
+            markersLayer.clearLayers();
+            allMarkers = {};
+            estacionamentos.forEach(est => {
+                if (est.latitude && est.longitude) {
+                    const marker = L.marker([est.latitude, est.longitude]);
+                    
+                    marker.on('click', () => {
+                        updateInfoPanel(est.id);
+                        map.flyTo([est.latitude, est.longitude], 17);
+                    });
+
+                    marker.bindPopup(`<b>${est.nome}</b><br>${est.endereco}`);
+                    markersLayer.addLayer(marker);
+                    allMarkers[est.id] = marker;
+                }
+            });
+        }
+        
+        const searchInput = document.getElementById('search-estacionamento');
+        const searchSuggestions = document.getElementById('search-suggestions');
+
+        searchInput.addEventListener('input', function() {
+            const query = searchInput.value;
+            if (query.length < 2) {
+                searchSuggestions.classList.remove('visible');
+                return;
+            }
+            fetch(`/api/search-estacionamentos/?q=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    searchSuggestions.innerHTML = '';
+                    if (data.length > 0) {
+                        searchSuggestions.classList.add('visible');
+                        data.forEach(est => {
+                            const li = document.createElement('li');
+                            li.textContent = est.nome;
+                            li.dataset.id = est.id;
+                            searchSuggestions.appendChild(li);
+                        });
+                    } else {
+                        searchSuggestions.classList.remove('visible');
+                    }
+                });
+        });
+
+        searchSuggestions.addEventListener('click', function(e) {
+            if (e.target && e.target.nodeName === 'LI') {
+                const estId = parseInt(e.target.dataset.id, 10);
+                searchInput.value = e.target.textContent;
+                searchSuggestions.classList.remove('visible');
+                if (allMarkers[estId]) {
+                    allMarkers[estId].fire('click');
+                }
+            }
+        });
+
+        updateMap(allEstacionamentos);
+    });
+    </script>
+{% endblock %}

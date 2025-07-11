@@ -1,87 +1,58 @@
-body {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  padding: 20px;
-  background-color: #a3a2a2; /* cinza claro */
+/* static/telaPrincipal.css */
+
+.container {
+    text-align: center;
 }
 
-/* Botões amarelo claro */
-button {
-  padding: 10px 20px;
-  font-size: 18px;
-  margin: 10px;
-  border: none;
-  border-radius: 8px;
-  background-color: #FFCC00; /* amarelo */
-  color: white;
-  cursor: pointer;
+/* SELETOR CORRIGIDO E MAIS ESPECÍFICO */
+/* Esta regra agora se aplica a qualquer link <a> com a classe .btn-principal que esteja dentro do .container */
+.container a.btn-principal {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 18px;
+    margin: 10px;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--cor-primaria);
+    color: #1C1C1C;
+    cursor: pointer;
+    font-weight: bold;
+    text-decoration: none; /* Garante que não haja sublinhado */
+    transition: filter 0.2s;
 }
 
-button:hover {
-  background-color: #c9a100; /* tom mais escuro no hover */
+.container a.btn-principal:hover {
+    filter: brightness(0.9);
 }
 
-/* Caixas brancas em volta */
+/* Caixas de conteúdo */
 .caixa {
-  background-color: white;
-  border-radius: 10px;
-  padding: 20px;
-  width: 80%;
-  margin: 20px auto;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #FFFFFF;
+    border: 1px solid var(--cor-neutra-clara);
+    color: var(--cor-texto);
+    border-radius: 10px;
+    padding: 20px;
+    width: 80%;
+    margin: 20px auto;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s, color 0.3s, border 0.3s;
 }
 
-/* Notificações */
 #notificacoes {
-  text-align: left;
-  height: 120px;
-  overflow-y: auto;
+    text-align: left;
+    height: 120px;
+    overflow-y: auto;
 }
 
-/* Avaliações */
 #avaliacoes .avaliacao {
-  margin-bottom: 10px;
-}
-
-.cabecalho {
-  background-color: white;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 30px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  margin-bottom: 30px;
-}
-
-.logo img {
-  height: 50px;
-}
-
-.menu button {
-  margin-left: 10px;
-  padding: 8px 16px;
-  font-size: 16px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  background-color: #666666; /* cinza para não ativo */
-  color: white;
-}
-
-.menu button:hover {
-  background-color: #555555;
-}
-
-.menu .ativo {
-  background-color: #FFCC00; /* amarelo claro */
-}
-
-.menu .ativo:hover {
-  background-color: #c9a100;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--cor-neutra-clara);
+    text-align: left;
 }
 
 .estrelas {
-  color: #FFCC00;
-  font-size: 1.2em;
-  vertical-align: middle;
+    color: var(--cor-primaria);
+    font-size: 1.2em;
+    vertical-align: middle;
 }

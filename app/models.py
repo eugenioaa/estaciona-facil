@@ -1,13 +1,38 @@
+# Caminho: app/models.py
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
+
+# NOVO MODELO PARA OS BAIRROS
+class Bairro(models.Model):
+    """
+    Armazena os nomes dos bairros para serem usados em um dropdown.
+    """
+    nome = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.nome
+
+    class Meta:
+        ordering = ['nome']
+
 
 class Usuario(AbstractUser):
     """
     Modelo de usuário personalizado com campos adicionais.
     """
     email = models.EmailField('email', unique=True)
-    lugar_mora = models.CharField('lugar onde mora', max_length=255, blank=True, null=True)
+    
+    # CAMPO 'lugar_mora' ATUALIZADO
+    # Agora é uma chave estrangeira (ForeignKey) para o modelo Bairro
+    lugar_mora = models.ForeignKey(
+        Bairro,
+        on_delete=models.SET_NULL, # Se um bairro for deletado, o campo no usuário fica nulo
+        null=True,
+        blank=True,
+        verbose_name='Bairro onde mora'
+    )
 
     VEHICLE_CHOICES = [
         ('carro', 'Carro'),
@@ -16,38 +41,61 @@ class Usuario(AbstractUser):
     vehicle_type = models.CharField(
         'utiliza veículo',
         max_length=50,
+        choices=VEHICLE_CHOICES,
         blank=True,
         null=True,
     )
 
-    REQUIRED_FIELDS = ['email']  # username continua obrigatório
+    REQUIRED_FIELDS = ['email']
 
     def __str__(self):
         return f"{self.username} ({self.email})"
 
 
-class Estacionamento(models.Model):
-    """
-    Modelo para armazenar informações sobre um estacionamento.
-    """
-    DISPONIBILIDADE_CHOICES = [
-        ('baixa', 'Baixa'),
-        ('media', 'Média'),
-        ('alta', 'Alta'),
-    ]
+# O resto dos seus modelos (Estacionamento, Avaliacao, etc.) continua igual abaixo...
 
-    nome = models.CharField('Nome', max_length=200)
+class Estacionamento(models.Model):
+    class Disponibilidade(models.TextChoices):
+        BAIXA = 'baixa', 'Baixa'
+        MEDIA = 'media', 'Média'
+        ALTA = 'alta', 'Alta'
+
+    nome = models.CharField(
+        'Nome', 
+        max_length=200, 
+        help_text="Nome comercial do estacionamento."
+    )
     endereco = models.CharField('Endereço', max_length=300)
-    disponibilidade = models.CharField(
-        'Disponibilidade',
-        max_length=5,
-        choices=DISPONIBILIDADE_CHOICES,
-        default='media',
+    imagem_url = models.URLField('URL da Imagem', max_length=500, blank=True, null=True)
+    latitude = models.FloatField(
+        'Latitude',
+        blank=True, null=True,
+        help_text="Coordenada de latitude para o mapa (ex: -22.9068)."
+    )
+    longitude = models.FloatField(
+        'Longitude',
+        blank=True, null=True,
+        help_text="Coordenada de longitude para o mapa (ex: -43.1729)."
     )
     horario_abertura = models.TimeField('Horário de Abertura')
     horario_fechamento = models.TimeField('Horário de Fechamento')
-    imagem_url = models.URLField('URL da Imagem', max_length=500, blank=True, null=True)
+    preco_por_hora = models.DecimalField(
+        'Preço por Hora',
+        max_digits=8,
+        decimal_places=2,
+        blank=True, null=True
+    )
+    vagas_totais = models.PositiveIntegerField('Vagas Totais', blank=True, null=True)
+    vagas_disponiveis = models.PositiveIntegerField('Vagas Disponíveis', blank=True, null=True)
+    disponibilidade = models.CharField(
+        'Disponibilidade',
+        max_length=5,
+        choices=Disponibilidade.choices,
+        default=Disponibilidade.MEDIA,
+        help_text="Calculado automaticamente se as vagas forem preenchidas."
+    )
     data_criacao = models.DateTimeField('Data de Criação', auto_now_add=True)
+    data_atualizacao = models.DateTimeField('Última Atualização', auto_now=True)
 
     class Meta:
         verbose_name = 'Estacionamento'
@@ -55,13 +103,22 @@ class Estacionamento(models.Model):
         ordering = ['nome']
 
     def __str__(self):
-        return f"{self.nome} - {self.endereco}"
+        return self.nome
+
+    def save(self, *args, **kwargs):
+        if self.vagas_totais is not None and self.vagas_disponiveis is not None and self.vagas_totais > 0:
+            percentual_disponivel = (self.vagas_disponiveis / self.vagas_totais) * 100
+            if percentual_disponivel <= 10:
+                self.disponibilidade = self.Disponibilidade.BAIXA
+            elif 10 < percentual_disponivel <= 50:
+                self.disponibilidade = self.Disponibilidade.MEDIA
+            else:
+                self.disponibilidade = self.Disponibilidade.ALTA
+        
+        super().save(*args, **kwargs)
 
 
 class Avaliacao(models.Model):
-    """
-    Avaliação de um estacionamento, podendo ser feita por usuário autenticado ou anônimo.
-    """
     usuario = models.ForeignKey(
         Usuario,
         on_delete=models.SET_NULL,

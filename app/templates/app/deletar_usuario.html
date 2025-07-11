@@ -1,0 +1,20 @@
+{% extends 'app/base.html' %}
+{% load static %}
+
+{% block title %}Deletar Conta - EstacionaFácil{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{% static 'forms.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Deletar Conta</h1>
+    <p>Tem a certeza que deseja deletar a sua conta? Esta ação não poderá ser desfeita.</p>
+    <form method="post" style="margin-top: 20px;">
+        {% csrf_token %}
+        <button type="submit" class="btn" style="background-color: #c00; color: #fff;">Confirmar Deleção</button>
+        <a href="{% url 'app:editar_usuario' %}" class="btn" style="background-color: #6c757d; margin-top: 10px;">Cancelar</a>
+    </form>
+</div>
+{% endblock %}
