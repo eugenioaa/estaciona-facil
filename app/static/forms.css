@@ -1,25 +1,28 @@
-/* Estilo unificado para todos os formulários */
+/* ==========================================================================
+   ESTILOS UNIFICADOS PARA FORMULÁRIOS (FORMS.CSS)
+   ========================================================================== */
+
+/* Container específico para formulários */
 .form-container {
     max-width: 500px;
     margin: 40px auto;
     padding: 30px;
-    background-color: var(--cor-fundo);
-    border: 1px solid var(--cor-neutra-clara);
+    background-color: var(--cor-fundo-caixa, #FFFFFF);
+    border: 1px solid var(--cor-neutra-clara, #E0E0E0);
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    transition: background-color 0.3s, border-color 0.3s;
 }
 
 .form-container h1 {
     text-align: center;
     margin-top: 0;
     margin-bottom: 25px;
-    color: var(--cor-texto);
 }
 
 .form-container p {
     text-align: center;
-    color: var(--cor-neutra-media);
+    color: var(--cor-neutra-media, #888888);
+    line-height: 1.5;
 }
 
 .field {
@@ -30,36 +33,38 @@
     display: block;
     margin-bottom: 5px;
     font-weight: bold;
-    color: var(--cor-texto);
 }
 
 .field input,
-.field select {
+.field select,
+.field textarea {
     width: 100%;
     padding: 12px;
-    box-sizing: border-box;
-    border: 1px solid var(--cor-neutra-media);
+    border: 1px solid var(--cor-neutra-media, #888888);
     border-radius: 5px;
-    background-color: var(--cor-fundo);
-    color: var(--cor-texto);
+    background-color: #FFFFFF;
+    color: var(--cor-texto, #1C1C1C);
     font-size: 1rem;
 }
 
 .field .errorlist {
-    color: #c00;
+    color: #e74c3c;
     list-style: none;
     padding: 5px 0 0 0;
+    margin: 0;
     font-size: 0.9em;
+    font-weight: bold;
 }
 
+/* ESTILO DO BOTÃO CORRIGIDO */
 .btn {
     display: block;
     width: 100%;
     padding: 12px;
     font-size: 1.1rem;
     font-weight: bold;
-    color: #1C1C1C;
-    background-color: var(--cor-primaria);
+    color: #1C1C1C; /* Texto preto */
+    background-color: var(--cor-primaria, #FFD700); /* Fundo amarelo */
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -78,22 +83,23 @@
 }
 
 .login-link a {
-    color: var(--cor-destaque);
+    color: var(--cor-destaque, #0D6EFD);
     text-decoration: none;
     font-weight: bold;
 }
 
+/* Estilos para o Autocomplete */
 .autocomplete-container {
     position: relative;
 }
 
 .suggestions-list {
-    display: none; /* Escondido por padrão */
+    display: none;
     position: absolute;
     top: 100%;
     left: 0;
     right: 0;
-    background-color: var(--cor-fundo);
+    background-color: #FFFFFF;
     border: 1px solid var(--cor-neutra-media);
     border-top: none;
     border-radius: 0 0 5px 5px;
@@ -106,7 +112,7 @@
 }
 
 .suggestions-list.visible {
-    display: block; /* Mostra a lista quando tem sugestões */
+    display: block;
 }
 
 .suggestions-list li {

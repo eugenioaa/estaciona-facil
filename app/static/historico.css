@@ -12,7 +12,7 @@
 table {
     width: 100%;
     border-collapse: collapse;
-    background-color: var(--cor-fundo);
+    background-color: #FFFFFF; /* <<< COR ALTERADA AQUI PARA BRANCO */
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     border-radius: 10px;
     overflow: hidden; /* Garante que o border-radius seja aplicado às células da tabela */

@@ -1,9 +1,10 @@
 {% extends 'app/base.html' %}
 {% load static %}
 
-{% block title %}Cadastro de Usuário - EstacionaFácil{% endblock %}
+{% block title %}Criar Conta - EstacionaFácil{% endblock %}
 
 {% block styles %}
+    {# Este template agora carrega o ficheiro de estilos unificado para formulários #}
     <link rel="stylesheet" href="{% static 'forms.css' %}" />
 {% endblock %}
 
@@ -14,12 +15,26 @@
         {% csrf_token %}
         {{ form.non_field_errors }}
         
-        <div class="field">{{ form.username.label_tag }}{{ form.username }}{{ form.username.errors }}</div>
-        <div class="field">{{ form.email.label_tag }}{{ form.email }}{{ form.email.errors }}</div>
-        <div class="field">{{ form.password.label_tag }}{{ form.password }}{{ form.password.errors }}</div>
-        <div class="field">{{ form.password2.label_tag }}{{ form.password2 }}{{ form.password2.errors }}</div>
-        
-        <!-- CAMPO DE BAIRRO COM AUTOCOMPLETE -->
+        <div class="field">
+            {{ form.username.label_tag }}
+            {{ form.username }}
+            {{ form.username.errors }}
+        </div>
+        <div class="field">
+            {{ form.email.label_tag }}
+            {{ form.email }}
+            {{ form.email.errors }}
+        </div>
+        <div class="field">
+            {{ form.password.label_tag }}
+            {{ form.password }}
+            {{ form.password.errors }}
+        </div>
+        <div class="field">
+            {{ form.password2.label_tag }}
+            {{ form.password2 }}
+            {{ form.password2.errors }}
+        </div>
         <div class="field">
             {{ form.lugar_mora_nome.label_tag }}
             <div class="autocomplete-container">
@@ -28,11 +43,15 @@
             </div>
             {{ form.lugar_mora_nome.errors }}
         </div>
-        {{ form.lugar_mora }} <!-- Campo escondido para o ID -->
-
-        <div class="field">{{ form.vehicle_type.label_tag }}{{ form.vehicle_type }}{{ form.vehicle_type.errors }}</div>
+        {{ form.lugar_mora }} <!-- Campo escondido -->
+        <div class="field">
+            {{ form.vehicle_type.label_tag }}
+            {{ form.vehicle_type }}
+            {{ form.vehicle_type.errors }}
+        </div>
         
-        <button type="submit" class="btn">Registrar</button>
+        <!-- A classe "btn" aplica o estilo amarelo e largo -->
+        <button type="submit" class="btn">Registar</button>
     </form>
     <p class="login-link">
       Já tem conta? <a href="{% url 'app:login' %}">Faça login</a>
@@ -41,76 +60,69 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
+    <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Encontra os elementos do formulário no HTML
     const bairroNomeInput = document.querySelector('.bairro-autocomplete');
     const bairroIdInput = document.getElementById('id_lugar_mora');
     const suggestionsList = document.getElementById('suggestions-list');
 
+    // Verifica se todos os elementos necessários existem na página
     if (bairroNomeInput && bairroIdInput && suggestionsList) {
-        console.log("Autocomplete iniciado com sucesso!"); // DEBUG
 
+        // Adiciona um "ouvinte" que é acionado sempre que o utilizador digita algo
         bairroNomeInput.addEventListener('input', function() {
             const query = bairroNomeInput.value;
-            console.log(`Utilizador digitou: ${query}`); // DEBUG
 
-            // Limpa o ID escondido se o utilizador apagar o texto
+            // Se o campo de texto estiver vazio, limpa o ID escondido e a lista de sugestões
             if (query.trim() === '') {
                 bairroIdInput.value = '';
                 suggestionsList.classList.remove('visible');
                 return;
             }
 
-            // Faz a chamada à API
+            // Faz a chamada à API que criámos no Django para buscar os bairros
             fetch(`/api/search-bairros/?q=${query}`)
-                .then(response => {
-                    console.log("Resposta da API recebida:", response.status, response.statusText); // DEBUG
-                    if (!response.ok) {
-                        throw new Error('A resposta da rede não foi ok');
-                    }
-                    return response.json();
-                })
+                .then(response => response.json()) // Converte a resposta para JSON
                 .then(data => {
-                    console.log("Dados recebidos:", data); // DEBUG
                     suggestionsList.innerHTML = ''; // Limpa sugestões antigas
                     if (data.length > 0) {
-                        suggestionsList.classList.add('visible');
+                        suggestionsList.classList.add('visible'); // Mostra a lista
+                        // Cria um item de lista (<li>) para cada bairro recebido
                         data.forEach(bairro => {
                             const li = document.createElement('li');
                             li.textContent = bairro.nome;
-                            li.dataset.id = bairro.id;
+                            li.dataset.id = bairro.id; // Guarda o ID do bairro no item da lista
                             suggestionsList.appendChild(li);
                         });
                     } else {
-                        suggestionsList.classList.remove('visible');
+                        suggestionsList.classList.remove('visible'); // Esconde a lista se não houver resultados
                     }
                 })
                 .catch(error => {
-                    console.error('Erro ao buscar sugestões:', error); // DEBUG
+                    console.error('Erro ao buscar sugestões:', error);
                     suggestionsList.classList.remove('visible');
                 });
         });
 
+        // Adiciona um "ouvinte" para quando o utilizador clica numa sugestão
         suggestionsList.addEventListener('click', function(e) {
             if (e.target && e.target.nodeName === 'LI') {
-                const nomeBairro = e.target.textContent;
-                const idBairro = e.target.dataset.id;
-                console.log(`Bairro selecionado: ${nomeBairro} (ID: ${idBairro})`); // DEBUG
-
-                bairroNomeInput.value = nomeBairro;
-                bairroIdInput.value = idBairro;
+                // Preenche o campo de texto com o nome do bairro clicado
+                bairroNomeInput.value = e.target.textContent;
+                // Preenche o campo escondido com o ID do bairro clicado
+                bairroIdInput.value = e.target.dataset.id;
+                // Esconde a lista de sugestões
                 suggestionsList.classList.remove('visible');
             }
         });
 
-        // Opcional: fechar sugestões ao clicar fora
+        // Opcional: esconde a lista de sugestões se o utilizador clicar fora dela
         document.addEventListener('click', function(e) {
             if (!bairroNomeInput.contains(e.target)) {
                 suggestionsList.classList.remove('visible');
             }
         });
-    } else {
-        console.error("Não foi possível encontrar os elementos do autocomplete no DOM."); // DEBUG
     }
 });
 </script>

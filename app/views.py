@@ -6,39 +6,81 @@ from django.core.serializers import serialize
 from django.contrib import messages
 from django.http import JsonResponse
 from .models import Bairro
-
-
+from django.http import JsonResponse
+from django.db.models import Avg, F
+from .models import Estacionamento, Bairro
 from .models import Estacionamento, Avaliacao, HistoricoOcupacao, Usuario
+from unidecode import unidecode
+from django.http import JsonResponse
+from .models import HistoricoOcupacao
+
 
 # --- Views do Mapa e Páginas Principais ---
 
 def mapa_interativo(request):
     """
     View que busca todos os estacionamentos com coordenadas válidas
-    e os envia para o template do mapa.
+    e os envia para o template, incluindo a avaliação mais recente e outros detalhes.
     """
     estacionamentos_com_coordenadas = Estacionamento.objects.filter(
-        latitude__isnull=False, 
+        latitude__isnull=False,
         longitude__isnull=False
     )
-    
-    # CORREÇÃO: Converter o queryset para uma lista de dicionários, em vez de usar serialize()
+
     estacionamentos_list = []
     for est in estacionamentos_com_coordenadas:
+        # Busca a avaliação mais recente que tenha um comentário
+        latest_review = Avaliacao.objects.filter(
+            estacionamento=est, 
+            comentario__isnull=False
+        ).exclude(comentario='').order_by('-data_avaliacao').first()
+
+        review_data = None
+        if latest_review:
+            review_data = {
+                'comentario': latest_review.comentario,
+                'media_avaliacao': latest_review.media_avaliacao(),
+                'usuario': latest_review.usuario.username if latest_review.usuario else "Anônimo",
+                'data_avaliacao': latest_review.data_avaliacao.strftime('%d/%m/%Y')
+            }
+
         estacionamentos_list.append({
             'id': est.pk,
             'nome': est.nome,
             'endereco': est.endereco,
             'latitude': est.latitude,
             'longitude': est.longitude,
-            'imagem_url': est.imagem_url, # Incluindo a URL da imagem para uso futuro
+            'imagem_url': est.imagem_url, # Adicionado
+            'horario_abertura': est.horario_abertura.strftime('%H:%M') if est.horario_abertura else 'N/A', # Adicionado
+            'horario_fechamento': est.horario_fechamento.strftime('%H:%M') if est.horario_fechamento else 'N/A', # Adicionado
+            'preco_por_hora': float(est.preco_por_hora) if est.preco_por_hora is not None else None, # Adicionado
+            'latest_review': review_data, # Adicionado
         })
     
     context = {
-        # Passar a lista de dicionários diretamente para o template
         'estacionamentos_list': estacionamentos_list,
     }
     return render(request, 'app/mapa_interativo.html', context)
+
+# NOVA VIEW PARA A API DE BUSCA DE ESTACIONAMENTOS
+def search_estacionamentos(request):
+    query = request.GET.get('q', '').strip()
+    query_unaccented = unidecode(query)
+
+    estacionamentos_list = []
+    if query:
+        todos_estacionamentos = Estacionamento.objects.filter(latitude__isnull=False, longitude__isnull=False)
+        resultados = [e for e in todos_estacionamentos if query_unaccented.lower() in unidecode(e.nome).lower()]
+
+        for est in resultados[:10]:
+            estacionamentos_list.append({
+                'id': est.pk, 
+                'nome': est.nome,
+                'lat': est.latitude,
+                'lng': est.longitude
+            })
+    
+    return JsonResponse(estacionamentos_list, safe=False)
 
 def tela_principal(request):
     ultimas_avaliacoes = Avaliacao.objects.filter(comentario__isnull=False).exclude(comentario='').order_by('-id')[:5]
@@ -198,17 +240,42 @@ def deletar_usuario(request):
 
 # NOVA VERSÃO DA VIEW PARA A API DE BUSCA
 def search_bairros(request):
-    # Pega o termo de busca e remove espaços em branco extras
     query = request.GET.get('q', '').strip()
-    
-    # Imprime no terminal para sabermos que a view foi chamada
-    print(f"Buscando bairros com o termo: '{query}'")
+    query_unaccented = unidecode(query) # Converte o termo da busca para sem acentos
 
     bairros_list = []
-    # Só faz a busca se o termo não for vazio
     if query:
-        bairros = Bairro.objects.filter(nome__icontains=query).order_by('nome')[:10]
-        for bairro in bairros:
+        # Busca todos os bairros e filtra em Python (melhor para lidar com acentos)
+        todos_bairros = Bairro.objects.all()
+        # Compara a versão sem acentos do nome do bairro com a busca
+        resultados = [b for b in todos_bairros if query_unaccented.lower() in unidecode(b.nome).lower()]
+        
+        for bairro in resultados[:10]: # Limita a 10 resultados
             bairros_list.append({'id': bairro.id, 'nome': bairro.nome})
     
     return JsonResponse(bairros_list, safe=False)
+
+@login_required
+def simulador_demanda(request, estacionamento_id):
+    estacionamento_principal = get_object_or_404(Estacionamento, pk=estacionamento_id)
+    
+    # Prepara os dados de TODOS os estacionamentos para a grade
+    estacionamentos_qs = Estacionamento.objects.all().order_by('id')
+    
+    todos_estacionamentos = []
+    for est in estacionamentos_qs:
+        todos_estacionamentos.append({
+            'id': est.id,
+            'nome': est.nome,
+            'endereco': est.endereco,
+            'imagem_url': est.imagem_url,
+            # Usa um preço muito alto para nulos, para que fiquem por último na ordenação
+            'preco_por_hora': est.preco_por_hora if est.preco_por_hora is not None else 999.0
+        })
+        
+    context = {
+        'estacionamento_principal': estacionamento_principal,
+        'todos_estacionamentos': todos_estacionamentos,
+    }
+    
+    return render(request, 'app/simulador.html', context)

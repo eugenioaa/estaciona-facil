@@ -13,18 +13,40 @@
     <form method="post" novalidate>
         {% csrf_token %}
         {{ form.non_field_errors }}
-        <div class="field">{{ form.username.label_tag }}{{ form.username }}{{ form.username.errors }}</div>
-        <div class="field">{{ form.email.label_tag }}{{ form.email }}{{ form.email.errors }}</div>
-        <div class="field">{{ form.lugar_mora.label_tag }}{{ form.lugar_mora }}{{ form.lugar_mora.errors }}</div>
-        <div class="field">{{ form.vehicle_type.label_tag }}{{ form.vehicle_type }}{{ form.vehicle_type.errors }}</div>
+
+        <div class="field">
+            {{ form.username.label_tag }}
+            {{ form.username }}
+            {{ form.username.errors }}
+        </div>
+        <div class="field">
+            {{ form.email.label_tag }}
+            {{ form.email }}
+            {{ form.email.errors }}
+        </div>
+        <div class="field">
+            {{ form.lugar_mora_nome.label_tag }}
+            <div class="autocomplete-container">
+                {{ form.lugar_mora_nome }}
+                <ul id="suggestions-list" class="suggestions-list"></ul>
+            </div>
+            {{ form.lugar_mora_nome.errors }}
+        </div>
+        {{ form.lugar_mora }} <!-- Campo escondido -->
+        <div class="field">
+            {{ form.vehicle_type.label_tag }}
+            {{ form.vehicle_type }}
+            {{ form.vehicle_type.errors }}
+        </div>
         <button type="submit" class="btn">Salvar Alterações</button>
     </form>
 
     <div style="border-top: 1px solid var(--cor-neutra-clara); margin: 30px 0;"></div>
 
-    <form method="post" action="{% url 'app:deletar_usuario' %}">
-        {% csrf_token %}
-        <button type="submit" class="btn" style="background-color: #c00; color: #fff;">Deletar Conta</button>
-    </form>
+    <a href="{% url 'app:deletar_usuario' %}" class="btn" style="background-color: #c00; color: #fff;">Deletar Conta</a>
 </div>
+{% endblock %}
+
+{% block scripts %}
+    <!-- O script do autocomplete que já implementámos vai aqui -->
 {% endblock %}

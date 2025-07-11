@@ -1,27 +1,33 @@
-/* CORRIGIDO: Centraliza o texto apenas na tela principal */
+/* static/telaPrincipal.css */
+
 .container {
     text-align: center;
 }
 
-/* Estilos gerais para botões na página principal */
-.container button {
+/* SELETOR CORRIGIDO E MAIS ESPECÍFICO */
+/* Esta regra agora se aplica a qualquer link <a> com a classe .btn-principal que esteja dentro do .container */
+.container a.btn-principal {
+    display: inline-block;
     padding: 10px 20px;
     font-size: 18px;
     margin: 10px;
-    /* ... */
+    border: none;
+    border-radius: 8px;
+    background-color: var(--cor-primaria);
+    color: #1C1C1C;
+    cursor: pointer;
+    font-weight: bold;
+    text-decoration: none; /* Garante que não haja sublinhado */
+    transition: filter 0.2s;
 }
 
-.container button:hover {
-    filter: brightness(0.9);
-}
-
-button:hover {
+.container a.btn-principal:hover {
     filter: brightness(0.9);
 }
 
 /* Caixas de conteúdo */
 .caixa {
-    background-color: var(--cor-fundo);
+    background-color: #FFFFFF;
     border: 1px solid var(--cor-neutra-clara);
     color: var(--cor-texto);
     border-radius: 10px;

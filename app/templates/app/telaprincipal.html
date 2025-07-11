@@ -12,10 +12,10 @@
     <h1>Encontre o melhor lugar para estacionar o seu carro</h1>
     <h1>Bem-vindo à Simulação</h1>
 
-    <button>Simular Agora</button>
+    <a href="{% url 'app:mapa_interativo' %}" class="btn-global">Simular Agora</a>
 
     <div class="caixa">
-        <img src="https://bynd.com.br/wp-content/uploads/2019/07/vagas-de-estacionamento.jpg" alt="Imagem de Simulação" style="max-width: 100%; height: auto;" />
+        <img src="https://bynd.com.br/wp-content/uploads/2019/07/vagas-de-estacionamento.jpg" alt="Imagem de um estacionamento cheio" style="max-width: 100%; height: auto; border-radius: 8px;" />
     </div>
 
     <div id="notificacoes" class="caixa">
@@ -25,23 +25,23 @@
 
     <div class="caixa">
         <h3>Que tal simular em outro horário?</h3>
-        <button>Ir para Simulador de Demanda</button>
+        <a href="{% url 'app:simulador_demanda' estacionamento_id=2 %}" class="btn-global">Ir para Simulador de Demanda</a>
     </div>
 
     <div id="avaliacoes" class="caixa">
-        <h3>Últimas Avaliações adicionadas</h3>
+        <h3>Últimas Avaliações Adicionadas</h3>
         {% for avaliacao in ultimas_avaliacoes %}
             <div class="avaliacao">
-                <strong>{{ avaliacao.usuario.username }}</strong> —
+                <strong>{{ avaliacao.usuario.username|default:"Anónimo" }}</strong> —
                 <span>{{ avaliacao.estacionamento.nome }}</span> —
                 <span class="estrelas">
                     {% with media=avaliacao.media_avaliacao %}
                         {% for i in "12345" %}
-                            {% if forloop.counter <= media %}★{% else %}☆{% endif %}
+                            {% if forloop.counter <= media|add:0 %}★{% else %}☆{% endif %}
                         {% endfor %}
                     {% endwith %}
                 </span><br>
-                {{ avaliacao.comentario }}
+                <em>{{ avaliacao.comentario }}</em>
             </div>
         {% empty %}
             <div class="avaliacao">Nenhuma avaliação ainda.</div>
@@ -52,20 +52,25 @@
 
 {% block scripts %}
     <script>
-        const notificacoes = [
-            "Novo cenário de simulação disponível.",
-            "Demanda atualizada com sucesso.",
-            "Erro corrigido no modelo de previsão.",
-            "Novo feedback recebido."
-        ];
+        document.addEventListener('DOMContentLoaded', function() {
+            const notificacoes = [
+                "Novo cenário de simulação disponível.",
+                "Demanda atualizada com sucesso.",
+                "Erro corrigido no modelo de previsão.",
+                "Novo feedback recebido."
+            ];
 
-        let index = 0;
-        setInterval(() => {
-            if (index < notificacoes.length) {
-                const li = document.createElement("li");
-                li.textContent = notificacoes[index++];
-                document.getElementById("notificacoes-lista").appendChild(li);
+            let index = 0;
+            const lista = document.getElementById("notificacoes-lista");
+            if (lista) {
+                setInterval(() => {
+                    if (index < notificacoes.length) {
+                        const li = document.createElement("li");
+                        li.textContent = notificacoes[index++];
+                        lista.appendChild(li);
+                    }
+                }, 2000);
             }
-        }, 2000);
+        });
     </script>
 {% endblock %}

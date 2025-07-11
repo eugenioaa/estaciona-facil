@@ -20,6 +20,10 @@ urlpatterns = [
     path('conta/editar/', views.editar_usuario, name='editar_usuario'),
     path('conta/deletar/', views.deletar_usuario, name='deletar_usuario'),
     
-    # NOVO URL PARA A API DE BUSCA DE BAIRROS
+    # APIs para Autocomplete
     path('api/search-bairros/', views.search_bairros, name='search_bairros'),
+    path('api/search-estacionamentos/', views.search_estacionamentos, name='search_estacionamentos'),
+
+    path('simulador/<int:estacionamento_id>/', views.simulador_demanda, name='simulador_demanda'),
+
 ]

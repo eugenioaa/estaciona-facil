@@ -1,4 +1,10 @@
-/* --- Universal Box Sizing Reset --- */
+/* static/main.css */
+
+/* ==========================================================================
+   FICHEIRO DE ESTILOS PRINCIPAL (MAIN.CSS)
+   ========================================================================== */
+
+/* --- 1. Reset e Configuração da Paleta de Cores --- */
 html {
   box-sizing: border-box;
 }
@@ -6,31 +12,17 @@ html {
   box-sizing: inherit;
 }
 
-/* --- 1. Configuração da Paleta de Cores com Variáveis CSS --- */
 :root {
     --cor-primaria: #FFD700;
     --cor-destaque: #0D6EFD;
-    --cor-fundo: #FFFFFF;
+    --cor-fundo: #a3a2a2;
     --cor-texto: #1C1C1C;
-    --cor-neutra-clara: #E0E0E0;
+    --cor-fundo-caixa: #FFFFFF;
+    --cor-neutra-clara: #E9ECEF;
     --cor-neutra-media: #888888;
     --cor-botao-inativo-fundo: #666666;
     --cor-botao-inativo-hover: #555555;
-    --cor-texto-ativo: #1C1C1C;
 }
-
-html.dark-mode {
-    /* Modo Escuro */
-    --cor-primaria: #FFD700;
-    --cor-fundo: #121212;
-    --cor-texto: #F5F5F5;
-    --cor-neutra-clara: #2a2a2a;
-    --cor-neutra-media: #aaaaaa;
-    --cor-botao-inativo-fundo: #2a2a2a;
-    --cor-botao-inativo-hover: #3c3c3c;
-    --cor-texto-ativo: #1C1C1C;
-}
-
 
 /* --- 2. Estilos Gerais --- */
 body {
@@ -38,29 +30,25 @@ body {
     background-color: var(--cor-fundo);
     color: var(--cor-texto);
     margin: 0;
-    transition: background-color 0.3s, color 0.3s;
 }
-
 
 /* --- 3. Cabeçalho e Navegação --- */
 .cabecalho {
-    background-color: var(--cor-fundo);
+    background-color: var(--cor-fundo-caixa);
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 10px 30px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     border-bottom: 1px solid var(--cor-neutra-clara);
-    transition: background-color 0.3s, border-bottom 0.3s;
 }
 
 .logo-container {
     display: flex;
     align-items: center;
-    gap: 20px;
 }
 
-.logo img {
+img.logo {
     height: 50px;
 }
 
@@ -90,33 +78,44 @@ body {
 
 .menu .button-link.ativo {
     background-color: var(--cor-primaria);
-    color: var(--cor-texto-ativo);
+    color: var(--cor-texto);
     font-weight: bold;
 }
 
-.dark-mode-toggle {
-    background: none;
-    border: 1px solid var(--cor-neutra-media);
-    color: var(--cor-texto);
-    font-size: 1.2rem;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.3s, color 0.3s;
-}
-
-.dark-mode-toggle:hover {
-    background-color: var(--cor-neutra-clara);
-}
-
-/* --- 4. CONTAINER DE CONTEÚDO PADRÃO --- */
+/* --- 4. Container e Caixa de Conteúdo Padrão --- */
 .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
-    overflow: auto; 
+}
+
+.caixa {
+    background-color: var(--cor-fundo-caixa);
+    border: 1px solid var(--cor-neutra-clara);
+    color: var(--cor-texto);
+    border-radius: 10px;
+    padding: 25px;
+    margin: 25px auto;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* ===== NOVA REGRA DE ESTILO PARA BOTÕES GLOBAIS ===== */
+.btn-global {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 18px;
+    margin: 10px;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--cor-primaria);
+    color: #1C1C1C;
+    cursor: pointer;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    transition: filter 0.2s;
+}
+
+.btn-global:hover {
+    filter: brightness(0.9);
 }

@@ -11,7 +11,6 @@
 <div class="container">
     <h1>Sistema de Avaliações de Estacionamentos</h1>
 
-    {# 1) Seletor de estacionamento #}
     <section class="selecionar-estacionamento caixa">
         <form method="get">
             <label for="estac_id">Escolha o estacionamento:</label>
@@ -26,17 +25,16 @@
         </form>
     </section>
 
-    {# 2) Mensagem se nenhum estacionamento for escolhido #}
     {% if not estacionamento %}
         <div class="caixa" style="text-align: center;">
             <p>Selecione um estacionamento acima para ver detalhes e avaliações.</p>
         </div>
     {% else %}
-
-        {# 3) Informações do estacionamento selecionado #}
         <section class="estacionamento-info caixa">
             {% if estacionamento.imagem_url %}
                 <img src="{{ estacionamento.imagem_url }}" alt="Foto de {{ estacionamento.nome }}" class="estacionamento-img">
+            {% else %}
+                <div class="image-placeholder"><i class="fa-regular fa-image"></i></div>
             {% endif %}
             <div>
                 <h2>{{ estacionamento.nome }}</h2>
@@ -46,7 +44,6 @@
             </div>
         </section>
 
-        {# 4) Avaliação média #}
         <section class="avaliacoes caixa">
             <h3>Avaliação Média</h3>
             <p>Segurança: <span class="estrelas">{{ media_seguranca }}</span></p>
@@ -55,13 +52,12 @@
             <p>Disponibilidade: <span class="estrelas">{{ media_disponibilidade }}</span></p>
         </section>
 
-        {# 5) Lista de avaliações individuais #}
         <section class="avaliacoes caixa">
-            <h3>Avaliações dos Usuários</h3>
+            <h3>Avaliações dos Utilizadores</h3>
             {% for avaliacao in avaliacoes %}
                 <div class="avaliacao">
                     <p>
-                        <strong>{{ avaliacao.usuario.username|default:"Anônimo" }}</strong> —
+                        <strong>{{ avaliacao.usuario.username|default:"Anónimo" }}</strong> —
                         <span class="estrelas">
                         {% with media=avaliacao.media_avaliacao %}
                             {% for i in "12345" %}
@@ -78,11 +74,11 @@
             {% endfor %}
         </section>
 
-        {# 6) Formulário para nova avaliação #}
         <section class="formulario caixa">
-            <h3>Deixe sua Avaliação</h3>
+            <h3>Deixe a sua Avaliação</h3>
             <form method="post">
                 {% csrf_token %}
+                <input type="hidden" name="estacionamento_id" value="{{ estacionamento.id }}">
                 {{ avaliacao_form.as_p }}
                 <button type="submit" class="btn">Enviar Avaliação</button>
             </form>

@@ -1,14 +1,11 @@
 /* Estilos para a página de Avaliações */
-
-/* Usa o container padrão, mas adiciona um cabeçalho centralizado */
 .container h1 {
     text-align: center;
     margin-bottom: 30px;
 }
 
-/* Estilo padrão para as caixas de conteúdo */
 .caixa {
-    background-color: var(--cor-fundo);
+    background-color: #FFFFFF;
     border: 1px solid var(--cor-neutra-clara);
     color: var(--cor-texto);
     border-radius: 10px;
@@ -17,7 +14,6 @@
     max-width: 900px;
     margin: 25px auto;
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    transition: background-color 0.3s, color 0.3s, border 0.3s;
 }
 
 /* Seção de seleção de estacionamento */
@@ -27,7 +23,7 @@
     font-size: 1rem;
     border-radius: 5px;
     border: 1px solid var(--cor-neutra-media);
-    background-color: var(--cor-fundo);
+    background-color: #FFFFFF; /* <<< CORRIGIDO PARA BRANCO */
     color: var(--cor-texto);
 }
 
@@ -68,11 +64,9 @@
 
 .avaliacao:last-child {
     border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
 }
 
-/* Formulário */
+/* Formulário de avaliação */
 .formulario form p {
     margin-bottom: 15px;
 }
@@ -86,9 +80,10 @@
 .formulario input, .formulario textarea {
     width: 100%;
     padding: 10px;
-    box-sizing: border-box; /* Garante que padding não afete a largura final */
+    box-sizing: border-box;
     border: 1px solid var(--cor-neutra-media);
     border-radius: 5px;
+    background-color: #FFFFFF; /* Garante que os inputs sejam brancos */
 }
 
 .formulario button.btn {
