@@ -10,22 +10,21 @@
 
 {% block content %}
 <div id="django-data" data-estacionamento-id="{{ estacionamento_principal.id }}" style="display: none;"></div>
-
-<div class="simulador-container">
-
-    <section class="grid-controls">
-        <div class="select-hora">
-          <label for="hora">Previsão para:</label>
-          <input type="time" id="hora" name="hora" min="00:00" max="23:59" value="08:00" />
-        </div>
-        <div class="filtros-container">
-            <select id="filtro-ordem">
-              <option value="padrao">Padrão</option>
-              <option value="mais-baratos">Mais baratos</option>
-            </select>
-            <button id="btn-filtro-cheio" class="btn-filtro">Ocultar Cheios</button>
-        </div>
-    </section>
+<div class="container">
+<section class="grid-controls">
+<!-- GRUPO ESQUERDA: Contém os filtros -->
+<div class="filtros-container">
+<select id="filtro-ordem" class="control-button">
+<option value="padrao">Padrão</option>
+<option value="mais-baratos">Mais baratos</option>
+</select>
+<button id="btn-filtro-cheio" class="control-button">Ocultar Cheios</button>
+</div>
+<div id="time-selector-container" class="control-button">
+    <label for="hora">Previsão para:</label>
+    <input type="time" id="hora" name="hora" />
+</div>
+</section>
 
     <section id="estacionamentos-grid" class="estacionamentos-grid">
         {% for est in todos_estacionamentos %}
@@ -68,113 +67,152 @@
 {% endblock %}
 
 {% block scripts %}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-    // Todo o script é envolvido em um try...catch para depuração
-    try {
-        document.addEventListener('DOMContentLoaded', function() {
-            const funcoesDeCalculo = {
-                1: calcularOcupacaoShoppingGavea, 2: calcularOcupacaoPUC, 3: calcularOcupacaoShoppingLeblon,
-                4: calcularOcupacaoZonaSul, 5: calcularOcupacaoParquePatins, 6: calcularOcupacaoPaoAcucar,
-                7: calcularOcupacaoGaveaTrade, 8: (h) => 15, 9: (h) => 35, 10: calcularOcupacaoEstapar,
-            };
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+try {
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // ======================================================================
+        // PARTE 1: SELEÇÃO DE TODOS OS ELEMENTOS DA PÁGINA
+        // ======================================================================
+        const funcoesDeCalculo = {
+            1: calcularOcupacaoShoppingGavea, 2: calcularOcupacaoPUC, 3: calcularOcupacaoShoppingLeblon,
+            4: calcularOcupacaoZonaSul, 5: calcularOcupacaoParquePatins, 6: calcularOcupacaoPaoAcucar,
+            7: calcularOcupacaoGaveaTrade, 8: (h) => 15, 9: (h) => 35, 10: calcularOcupacaoEstapar,
+        };
 
-            const djangoDataElement = document.getElementById('django-data');
-            const estacionamentoPrincipalId = parseInt(djangoDataElement.dataset.estacionamentoId, 10);
-            const calcularOcupacaoAtual = funcoesDeCalculo[estacionamentoPrincipalId] || ((h) => 30);
+        const djangoDataElement = document.getElementById('django-data');
+        const estacionamentoPrincipalId = parseInt(djangoDataElement.dataset.estacionamentoId, 10);
+        const inputHora = document.getElementById('hora');
+        const barraPrincipal = document.getElementById('barra-preenchida-principal');
+        const textoBarraPrincipal = document.getElementById('barra-texto-principal');
+        const btnFiltroCheio = document.getElementById('btn-filtro-cheio');
+        const gridContainer = document.getElementById('estacionamentos-grid');
+        const canvasGrafico = document.getElementById('ocupacaoChart');
 
-            const inputHora = document.getElementById('hora');
-            const barraPrincipal = document.getElementById('barra-preenchida-principal');
-            const textoBarraPrincipal = document.getElementById('barra-texto-principal');
-            const btnFiltroCheio = document.getElementById('btn-filtro-cheio');
-            const filtroOrdem = document.getElementById('filtro-ordem');
-            const gridContainer = document.getElementById('estacionamentos-grid');
+        // ======================================================================
+        // PARTE 2: TODAS AS FUNÇÕES DE CÁLCULO DE OCUPAÇÃO
+        // ======================================================================
+        function calcularOcupacaoPUC(h) { if (h<7) return 5; if (h<8.5) return 5+((h-7)/1.5)*80; if (h<12) return 85+5*Math.sin((h-8.5)*Math.PI*2/3.5); if (h<13) return 85-((h-12)/1)*65; if (h<15) return 50+10*Math.sin((h-13)*Math.PI); if (h<17) return 50-((h-15)/2)*40; return 5; }
+        function calcularOcupacaoShoppingGavea(h) { if (h>=10&&h<=18) return 20+((h-10)/8)*60; return 20; }
+        function calcularOcupacaoShoppingLeblon(h) { if (h>=12&&h<=14) return 25+((h-12)/2)*60; if (h>14&&h<=16) return 85-((h-14)/2)*60; return 25; }
+        function calcularOcupacaoZonaSul(h) { if (h>=11&&h<=14) return 30+((h-11)/3)*50; return 30; }
+        function calcularOcupacaoParquePatins(h) { return 10; }
+        function calcularOcupacaoPaoAcucar(h) { if (h>=10&&h<=14) return 25+((h-10)/4)*60; return 25; }
+        function calcularOcupacaoGaveaTrade(h) { if (h>=9&&h<=12) return 25+((h-9)/3)*55; if (h>=14&&h<=17) return 25+((h-14)/3)*55; return 25; }
+        function calcularOcupacaoEstapar(h) { if (h>=9&&h<=12) return 30+((h-9)/3)*55; if (h>=14&&h<=17) return 30+((h-14)/3)*55; return 30; }
 
-            const ctx = document.getElementById('ocupacaoChart').getContext('2d');
-            const ocupacaoChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: Array.from({length: 24}, (_, i) => `${i}:00`),
-                    datasets: [{
-                        label: 'Ocupação Prevista (%)',
-                        data: Array.from({length: 24}, (_, h) => Math.round(calcularOcupacaoAtual(h))),
-                        borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.2)', fill: true, tension: 0.3
-                    }]
-                },
-                options: { responsive: true, scales: { y: { min: 0, max: 100 }, x: { title: { display: true, text: 'Hora do dia' } } } }
+        // ======================================================================
+        // PARTE 3: FUNÇÕES QUE ATUALIZAM A INTERFACE GRÁFICA
+        // ======================================================================
+        function horaStringParaDecimal(horaStr) {
+            if (!horaStr) { const agora = new Date(); return agora.getHours() + agora.getMinutes() / 60; }
+            const [h, m] = horaStr.split(':').map(Number); return h + m / 60;
+        }
+
+        function atualizarLinksDosCards(horaString) {
+            if (!horaString) return;
+            document.querySelectorAll('.card-link').forEach(link => {
+                const url = new URL(link.href);
+                url.searchParams.set('time', horaString);
+                link.href = url.toString();
             });
+        }
 
-            function horaStringParaDecimal(horaStr) { const [h, m] = horaStr.split(':').map(Number); return h + m / 60; }
+        function atualizarBarraPrincipal(horaDecimal) {
+            const func = funcoesDeCalculo[estacionamentoPrincipalId] || ((h) => 30);
+            let ocupacao = Math.round(func(horaDecimal));
+            barraPrincipal.style.width = ocupacao + '%';
+            textoBarraPrincipal.textContent = `${ocupacao}% das vagas estão ocupadas`;
+            barraPrincipal.classList.remove('vermelha');
+            if (ocupacao >= 80) barraPrincipal.classList.add('vermelha');
+        }
 
-            function atualizarBarraPrincipal(horaDecimal) {
-                let ocupacao = Math.round(calcularOcupacaoAtual(horaDecimal));
-                barraPrincipal.style.width = ocupacao + '%';
-                textoBarraPrincipal.textContent = `${ocupacao}% das vagas estão ocupadas`;
-                barraPrincipal.className = 'barra-preenchida';
-                if (ocupacao >= 80) barraPrincipal.classList.add('vermelha');
-            }
-
-            function atualizarTodasAsMiniBarras(horaDecimal) {
-                document.querySelectorAll('.mini-barra-preenchida').forEach(barra => {
-                    const id = parseInt(barra.id.split('-').pop(), 10);
-                    const func = funcoesDeCalculo[id] || ((h) => 30);
-                    const ocupacao = Math.round(func(horaDecimal));
-                    barra.style.width = ocupacao + '%';
-                    const card = barra.closest('.card');
-                    card.classList.remove('borda-azul', 'borda-vermelha');
-                    if (ocupacao >= 80) { card.classList.add('borda-vermelha'); } 
-                    else if (card.classList.contains('destaque')) { card.classList.add('borda-azul'); }
-                });
-            }
-
-            function aplicarFiltroCheio() {
-                const horaDecimal = horaStringParaDecimal(inputHora.value);
-                const filtroAtivo = btnFiltroCheio.classList.contains('ativo');
-                document.querySelectorAll('.card-link').forEach(link => {
-                    const id = parseInt(link.dataset.id, 10);
-                    const func = funcoesDeCalculo[id] || ((h) => 30);
-                    const ocupacao = Math.round(func(horaDecimal));
-                    if (filtroAtivo && ocupacao >= 80) { link.classList.add('escondido'); } 
-                    else { link.classList.remove('escondido'); }
-                });
-            }
-
-            function ordenarEstacionamentos() {
-                const cards = Array.from(gridContainer.children);
-                cards.sort((a, b) => {
-                    const precoA = parseFloat(a.dataset.preco);
-                    const precoB = parseFloat(b.dataset.preco);
-                    return precoA - precoB;
-                });
-                cards.forEach(card => gridContainer.appendChild(card));
-            }
-
-            btnFiltroCheio.addEventListener('click', () => { btnFiltroCheio.classList.toggle('ativo'); aplicarFiltroCheio(); });
-            filtroOrdem.addEventListener('change', (e) => { if (e.target.value === 'mais-baratos') { ordenarEstacionamentos(); } });
-            inputHora.addEventListener('input', e => {
-                const horaDecimal = horaStringParaDecimal(e.target.value);
-                atualizarBarraPrincipal(horaDecimal);
-                atualizarTodasAsMiniBarras(horaDecimal);
-                aplicarFiltroCheio();
+        function atualizarTodasAsMiniBarras(horaDecimal) {
+            document.querySelectorAll('.mini-barra-preenchida').forEach(barra => {
+                const id = parseInt(barra.id.split('-').pop(), 10);
+                const func = funcoesDeCalculo[id] || ((h) => 30);
+                const ocupacao = Math.round(func(horaDecimal));
+                barra.style.width = ocupacao + '%';
+                barra.classList.remove('vermelha');
+                if (ocupacao >= 80) barra.classList.add('vermelha');
+                const card = barra.closest('.card');
+                card.classList.remove('borda-vermelha', 'borda-azul');
+                if (ocupacao >= 80) card.classList.add('borda-vermelha');
+                else if (card.classList.contains('destaque')) card.classList.add('borda-azul');
             });
-            
-            const horaInicial = horaStringParaDecimal(inputHora.value);
-            atualizarBarraPrincipal(horaInicial);
-            atualizarTodasAsMiniBarras(horaInicial);
-            
-            function calcularOcupacaoPUC(h) { if (h<7) return 5; if (h<8.5) return 5+((h-7)/1.5)*80; if (h<12) return 85+5*Math.sin((h-8.5)*Math.PI*2/3.5); if (h<13) return 85-((h-12)/1)*65; if (h<15) return 50+10*Math.sin((h-13)*Math.PI); if (h<17) return 50-((h-15)/2)*40; return 5; }
-            function calcularOcupacaoShoppingGavea(h) { if (h>=10&&h<=18) return 20+((h-10)/8)*60; return 20; }
-            function calcularOcupacaoShoppingLeblon(h) { if (h>=12&&h<=14) return 25+((h-12)/2)*60; if (h>14&&h<=16) return 85-((h-14)/2)*60; return 25; }
-            function calcularOcupacaoZonaSul(h) { if (h>=11&&h<=14) return 30+((h-11)/3)*50; return 30; }
-            function calcularOcupacaoParquePatins(h) { return 10; }
-            function calcularOcupacaoPaoAcucar(h) { if (h>=10&&h<=14) return 25+((h-10)/4)*60; return 25; }
-            function calcularOcupacaoGaveaTrade(h) { if (h>=9&&h<=12) return 25+((h-9)/3)*55; if (h>=14&&h<=17) return 25+((h-14)/3)*55; return 25; }
-            function calcularOcupacaoEstapar(h) { if (h>=9&&h<=12) return 30+((h-9)/3)*55; if (h>=14&&h<=17) return 30+((h-14)/3)*55; return 30; }
+        }
+
+        function aplicarFiltroCheio(horaDecimal) {
+            const filtroAtivo = btnFiltroCheio.classList.contains('ativo');
+            document.querySelectorAll('.card-link').forEach(link => {
+                const id = parseInt(link.dataset.id, 10);
+                const func = funcoesDeCalculo[id] || ((h) => 30);
+                const ocupacao = Math.round(func(horaDecimal));
+                if (filtroAtivo && ocupacao >= 80) link.classList.add('escondido');
+                else link.classList.remove('escondido');
+            });
+        }
+
+        // ======================================================================
+        // PARTE 4: INICIALIZAÇÃO DO GRÁFICO
+        // ======================================================================
+        const calcularOcupacaoGrafico = funcoesDeCalculo[estacionamentoPrincipalId] || ((h) => 30);
+        const ctx = canvasGrafico.getContext('2d');
+        const ocupacaoChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: Array.from({length: 24}, (_, i) => `${i}:00`),
+                datasets: [{
+                    label: 'Ocupação Prevista (%)',
+                    data: Array.from({length: 24}, (_, h) => Math.round(calcularOcupacaoGrafico(h))),
+                    borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.2)', fill: true, tension: 0.3
+                }]
+            },
+            options: { responsive: true, scales: { y: { min: 0, max: 100 }, x: { title: { display: true, text: 'Hora do dia' } } } }
         });
-    } catch (e) {
-        console.error("Ocorreu um erro no script do simulador:", e);
-        // Opcional: mostrar um erro para o usuário
-        // document.body.innerHTML = '<h1>Ocorreu um erro ao carregar a página. Verifique o console.</h1>';
-    }
-    </script>
+
+        // ======================================================================
+        // PARTE 5: LÓGICA CENTRAL - EVENTOS E INICIALIZAÇÃO
+        // ======================================================================
+        function atualizarTudo(horaDecimal) {
+            atualizarBarraPrincipal(horaDecimal);
+            atualizarTodasAsMiniBarras(horaDecimal);
+            aplicarFiltroCheio(horaDecimal);
+        }
+
+        inputHora.addEventListener('input', (e) => {
+            const horaString = e.target.value;
+            const horaDecimal = horaStringParaDecimal(horaString);
+            atualizarTudo(horaDecimal);
+            atualizarLinksDosCards(horaString);
+        });
+
+        btnFiltroCheio.addEventListener('click', () => {
+            btnFiltroCheio.classList.toggle('ativo');
+            const horaDecimal = horaStringParaDecimal(inputHora.value);
+            aplicarFiltroCheio(horaDecimal);
+        });
+
+        function inicializarPagina() {
+            let horaInicialString = inputHora.value;
+            if (!horaInicialString) {
+                const agora = new Date();
+                const horas = String(agora.getHours()).padStart(2, '0');
+                const minutos = String(agora.getMinutes()).padStart(2, '0');
+                horaInicialString = `${horas}:${minutos}`;
+                inputHora.value = horaInicialString;
+            }
+            const horaDecimalInicial = horaStringParaDecimal(horaInicialString);
+            atualizarTudo(horaDecimalInicial);
+            atualizarLinksDosCards(horaInicialString);
+        }
+
+        inicializarPagina();
+
+    });
+} catch (e) {
+    console.error("Ocorreu um erro CRÍTICO no script do simulador:", e);
+}
+</script>
 {% endblock %}
